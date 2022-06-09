@@ -15,13 +15,14 @@
         </el-form-item>
       </el-form>
     </el-card>
-
   </div>
 
 
 </template>
 
 <script>
+import Element from "element-ui";
+
 export default {
   name: "LoginPage",
   data() {
@@ -45,9 +46,10 @@ export default {
     submitForm(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          this.axios.post('/login', this.loginForm).then((response) => {
+          this.$axios.post('/login', this.loginForm).then((response) => {
             const jwt = response.headers['authorization']
             this.$store.commit('SET_TOKEN', jwt)
+            Element.Message.error(response.status)
             this.$router.push('/home')
           })
         } else {
