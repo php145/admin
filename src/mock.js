@@ -1,3 +1,5 @@
+// import Element from "element-ui"
+
 const Mock = require('mockjs')
 
 let Result = {
@@ -7,7 +9,5 @@ let Result = {
 }
 
 Mock.mock('/login', 'post', () => {
-    Result.code = 400
-    Result.msg = "验证码错误"
     return Result
 })
