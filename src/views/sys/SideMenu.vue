@@ -18,24 +18,30 @@
         <i class="el-icon-s-operation"></i>
         <span>系统管理</span>
       </template>
-      <el-menu-item index="1-1">
-        <template slot="title">
-          <i class="el-icon-s-custom"></i>
-          <span slot="title">用户管理</span>
-        </template>
-      </el-menu-item>
-      <el-menu-item index="1-2">
-        <template slot="title">
-          <i class="el-icon-rank"></i>
-          <span slot="title">角色管理</span>
-        </template>
-      </el-menu-item>
-      <el-menu-item index="1-3">
-        <template slot="title">
-          <i class="el-icon-menu"></i>
-          <span slot="title">菜单管理</span>
-        </template>
-      </el-menu-item>
+      <router-link to="/sys/users">
+        <el-menu-item index="1-1">
+          <template slot="title">
+            <i class="el-icon-s-custom"></i>
+            <span slot="title">用户管理</span>
+          </template>
+        </el-menu-item>
+      </router-link>
+      <router-link to="/sys/roles">
+        <el-menu-item index="1-2">
+          <template slot="title">
+            <i class="el-icon-rank"></i>
+            <span slot="title">角色管理</span>
+          </template>
+        </el-menu-item>
+      </router-link>
+      <router-link to="/sys/menus">
+        <el-menu-item index="1-3">
+          <template slot="title">
+            <i class="el-icon-menu"></i>
+            <span slot="title">菜单管理</span>
+          </template>
+        </el-menu-item>
+      </router-link>
     </el-submenu>
     <el-submenu index="2">
       <template slot="title">
@@ -56,7 +62,7 @@
 export default {
   name: "SideMenu",
   data() {
-
+    return {}
   }
 }
 </script>

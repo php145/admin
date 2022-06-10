@@ -36,7 +36,7 @@ export default {
         ],
         password: [
           {required: true, message: '请输入密码', trigger: 'blur'},
-          {min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur'}
+          {min: 3, message: '最少3个字符', trigger: 'blur'}
         ]
       }
     };
@@ -48,7 +48,7 @@ export default {
           this.$axios.post('/login', this.loginForm).then((response) => {
             const jwt = response.headers['authorization']
             this.$store.commit('SET_TOKEN', jwt)
-            this.$router.push('/home')
+            this.$router.push('/index')
           })
         } else {
           console.log('error submit!!');

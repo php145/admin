@@ -12,16 +12,20 @@
                      src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"></el-avatar>
           <el-dropdown>
             <span class="el-dropdown-link">
-              admin<i class="el-icon-arrow-down el-icon--right"></i>
+              {{ userInfo.username }}<i class="el-icon-arrow-down el-icon--right"></i>
             </span>
             <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item>个人中心</el-dropdown-item>
+              <el-dropdown-item>
+                <router-link :to="{name:'UserCenter'}"></router-link>
+              </el-dropdown-item>
               <el-dropdown-item>退出</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
         </div>
       </el-header>
-      <el-main>Main</el-main>
+      <el-main>
+        <router-view></router-view>
+      </el-main>
     </el-container>
   </el-container>
 </template>
@@ -30,9 +34,28 @@
 import SideMenu from "./sys/SideMenu";
 
 export default {
-  name: "IndexView",
+  name: "HomeView",
   components: {
     SideMenu
+  },
+  data() {
+    return {
+      userInfo: {
+        id: "",
+        username: "",
+        avatar: ""
+      }
+    }
+  },
+  created() {
+    this.getUserInfo()
+  },
+  methods: {
+    getUserInfo() {
+      this.$axios.get("/sys/userInfo").then(res => {
+        this.userInfo = res.data.data
+      })
+    }
   }
 }
 </script>
