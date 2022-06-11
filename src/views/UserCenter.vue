@@ -1,7 +1,7 @@
 <template>
   <div>
-    <el-form :model="passForm" :rules="rules" ref="loginForm" label-width="100px" class="demo-loginForm">
-      <h2 class="">你好，{{}}}</h2>
+    <el-form :model="passForm" :rules="rules" ref="passForm" label-width="100px" class="demo-loginForm">
+      <h2 class="">你好，{{ userInfo.username }}</h2>
       <el-form-item label="旧密码" prop="currentPass">
         <el-input v-model="passForm.currentPass" autocomplete="off"></el-input>
       </el-form-item>
@@ -45,13 +45,49 @@ export default {
           {min: 6, max: 12, message: '长度在 6 到 12 个字符', trigger: 'blur'}
         ],
         checkPass: [{required: true, validator: validatePass, trigger: 'blur'}],
-        currentPass: []
+        currentPass: [{
+          required: true, message: '请输入当前密码', trigger: 'blur'
+        }]
       }
+    }
+  },
+  created() {
+    this.getUserInfo()
+  },
+  methods: {
+    getUserInfo() {
+      this.$axios.get("/sys/userInfo").then(res => {
+        this.userInfo = res.data.data
+      })
+    },
+    submitForm(formName) {
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          const _this = this
+          this.$axios.post('/sys/user/updatePass', this.passForm).then(res => {
+            _this.$alert(res.data.msg, '提示', {
+              confirmButtonText: '确定',
+              callback: () => {
+                this.$refs[formName].resetFields()
+              }
+            })
+          })
+        } else {
+          console.log('error submit!!')
+          return false
+        }
+      })
+    },
+    resetForm(formName) {
+      this.$refs[formName].resetFields()
     }
   }
 }
 </script>
 
 <style scoped>
-
+.el-form {
+  width: 420px;
+  margin: 50px auto;
+}
 </style>

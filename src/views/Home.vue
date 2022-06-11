@@ -1,42 +1,46 @@
 <template>
   <el-container>
-    <el-aside width="200px">
-      <side-menu></side-menu>
-    </el-aside>
-
-    <el-container>
-      <el-header>
-        <strong>后台管理系统</strong>
-        <div class="header-avatar">
-          <el-avatar size="medium"
-                     src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"></el-avatar>
-          <el-dropdown>
+    <el-header>
+      <strong>后台管理系统</strong>
+      <div class="header-avatar">
+        <el-avatar size="medium"
+                   src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"></el-avatar>
+        <el-dropdown>
             <span class="el-dropdown-link">
               {{ userInfo.username }}<i class="el-icon-arrow-down el-icon--right"></i>
             </span>
-            <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item>
-                <router-link :to="{name:'UserCenter'}"></router-link>
-              </el-dropdown-item>
-              <el-dropdown-item>退出</el-dropdown-item>
-            </el-dropdown-menu>
-          </el-dropdown>
-        </div>
-      </el-header>
+          <el-dropdown-menu slot="dropdown">
+            <el-dropdown-item>
+              <router-link :to="{name:'UserCenter'}">个人中心</router-link>
+            </el-dropdown-item>
+            <el-dropdown-item @click.native="logout">退出</el-dropdown-item>
+          </el-dropdown-menu>
+        </el-dropdown>
+      </div>
+    </el-header>
+    <el-container>
+      <el-aside width="200px">
+        <side-menu></side-menu>
+      </el-aside>
+
       <el-main>
-        <router-view></router-view>
+        <tabs></tabs>
+        <div style="margin: 0 15px">
+          <router-view></router-view>
+        </div>
       </el-main>
     </el-container>
   </el-container>
 </template>
 
 <script>
-import SideMenu from "./sys/SideMenu";
+import SideMenu from "./inc/SideMenu";
+import Tabs from "@/views/inc/Tabs";
 
 export default {
   name: "HomeView",
   components: {
-    SideMenu
+    SideMenu, Tabs
   },
   data() {
     return {
@@ -54,6 +58,14 @@ export default {
     getUserInfo() {
       this.$axios.get("/sys/userInfo").then(res => {
         this.userInfo = res.data.data
+      })
+    },
+    logout() {
+      this.$axios.post('/logout').then(() => {
+        localStorage.clear()
+        sessionStorage.clear()
+        this.$store.commit("resetState")
+        this.$router.push("/login")
       })
     }
   }
@@ -95,10 +107,9 @@ export default {
 }
 
 .el-main {
-  background-color: #E9EEF3;
   color: #333;
-  text-align: center;
-  line-height: 160px;
+  text-align: left;
+  padding: 0;
 }
 
 .el-menu-vertical-demo {
