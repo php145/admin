@@ -94,7 +94,6 @@ router.beforeEach((to, from, next) => {
             // console.log(router.getRoutes())
         })
     }
-
     next()
 })
 
