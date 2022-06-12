@@ -15,6 +15,7 @@ Vue.use(Element)
 /*Vue.use(VueAxios, axios)*/
 
 require("./mock.js")
+require("./globalFun.js")
 
 new Vue({
     router, store, render: h => h(App)
