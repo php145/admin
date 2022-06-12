@@ -63,9 +63,16 @@ const router = new VueRouter({
 router.beforeEach((to, from, next) => {
 
     let hasRoute = store.state.menus.hasRoute;
+
+    // let token = localStorage.getItem("token");
     // let newRoutes = router.options.routes
     console.log(hasRoute)
-
+    //
+    // if (to.path == '/login') {
+    //     next()
+    // } else if (!token) {
+    //     next({path: '/login'})
+    // }
 
     if (!hasRoute) {
         axios.get('/sys/menu/nav', {

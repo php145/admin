@@ -22,6 +22,8 @@
 
 <script>
 
+import qs from 'qs';
+
 export default {
   name: "LoginPage",
   data() {
@@ -45,7 +47,9 @@ export default {
     submitForm(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          this.$axios.post('/login', this.loginForm).then((response) => {
+          console.log(qs.stringify(this.loginForm))
+          this.$axios.post('/login?' + qs.stringify(this.loginForm)).then((response) => {
+            console.log(response)
             const jwt = response.headers['authorization']
             this.$store.commit('SET_TOKEN', jwt)
             this.$router.push('/index')
