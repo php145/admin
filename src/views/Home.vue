@@ -4,7 +4,7 @@
       <strong>后台管理系统</strong>
       <div class="header-avatar">
         <el-avatar size="medium"
-                   src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"></el-avatar>
+                   :src="userInfo.avatar"></el-avatar>
         <el-dropdown>
             <span class="el-dropdown-link">
               {{ userInfo.username }}<i class="el-icon-arrow-down el-icon--right"></i>
