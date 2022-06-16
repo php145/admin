@@ -134,12 +134,13 @@
 
     </el-dialog>
 
+
     <el-dialog
         title="分配权限"
         :visible.sync="permDialogVisible"
         width="600px">
 
-      <el-form :model="permForm">
+      <el-form :mbodel="permForm">
 
         <el-tree
             :data="permTreeData"
@@ -150,16 +151,15 @@
             :check-strictly=false
             :props="defaultProps">
         </el-tree>
-
-
       </el-form>
 
       <span slot="footer" class="dialog-footer">
           <el-button @click="permDialogVisible = false">取 消</el-button>
-          <el-button type="primary" @click="submitPermFormHandle('permForm')">确 定</el-button>
+          <el-button type="primary" @click="submitPermFormHandle()">确 定</el-button>
 			</span>
 
     </el-dialog>
+
 
   </div>
 </template>
@@ -289,6 +289,7 @@ export default {
     },
     editHandle(id) {
       this.$axios.get('/sys/role/info/' + id).then(res => {
+
         this.editForm = res.data.data
 
         this.dialogVisible = true
@@ -324,12 +325,16 @@ export default {
 
       this.$axios.get("/sys/role/info/" + id).then(res => {
 
-        this.$refs.permTree.setCheckedKeys(res.data.data.menuIds)
+        console.log(res.data.data)
+
+        this.$refs.permTree.setCheckedKeys(res.data.data.menuIds, false)
+
+        console.log(this.$refs.permTree)
         this.permForm = res.data.data
       })
     },
 
-    submitPermFormHandle(formName) {
+    submitPermFormHandle() {
       var menuIds = this.$refs.permTree.getCheckedKeys()
 
       console.log(menuIds)
@@ -344,7 +349,7 @@ export default {
           }
         });
         this.permDialogVisible = false
-        this.resetForm(formName)
+        // this.resetForm(formName)
       })
     }
   }

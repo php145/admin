@@ -10,7 +10,7 @@
               {{ userInfo.username }}<i class="el-icon-arrow-down el-icon--right"></i>
             </span>
           <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item>
+            <el-dropdown-item @click="selectMenu()">
               <router-link :to="{name:'UserCenter'}">个人中心</router-link>
             </el-dropdown-item>
             <el-dropdown-item @click.native="logout">退出</el-dropdown-item>

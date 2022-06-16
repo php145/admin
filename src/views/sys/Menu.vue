@@ -57,7 +57,8 @@
       </el-table-column>
       <el-table-column
           prop="statu"
-          label="状态">
+          label="状态"
+          width="70">
         <template slot-scope="scope">
           <el-tag size="small" v-if="scope.row.statu === 1" type="success">正常</el-tag>
           <el-tag size="small" v-else-if="scope.row.statu === 0" type="danger">禁用</el-tag>
@@ -67,11 +68,10 @@
 
       <el-table-column
           prop="icon"
-          label="操作">
+          label="操作"
+          width="180">
 
         <template slot-scope="scope">
-          <!--          <el-button type="text" @click="editHandle(scope.row.id)">编辑</el-button>-->
-
           <el-button
               size="mini"
               @click="editHandle(scope.row.id)">编辑
@@ -200,7 +200,6 @@ export default {
         if (valid) {
           this.$axios.post('/sys/menu/' + (this.editForm.id ? 'update' : 'save'), this.editForm)
               .then(() => {
-
                 this.$message({
                   showClose: true,
                   message: '恭喜你，操作成功',
@@ -209,7 +208,6 @@ export default {
                     this.getMenuTree()
                   }
                 });
-
                 this.dialogVisible = false
               })
         } else {

@@ -7,8 +7,7 @@
       :default-active="this.$store.state.menus.editableTabsValue"
   >
     <router-link to="/index">
-      <el-menu-item index="Index" @click="selectMenu({name: 'Index',
-                    title: '首页',})">
+      <el-menu-item index="Index">
         <template slot="title">
           <i class="el-icon-s-home"></i>
           <span slot="title">首页</span>
@@ -22,7 +21,7 @@
       </template>
 
       <router-link :to="item.path" v-for="item in menu.children" v-bind:key="item.name">
-        <el-menu-item :index="item.name" @click="selectMenu(item)">
+        <el-menu-item :index="item.name">
           <template slot="title">
             <i :class="item.icon"></i>
             <span slot="title">{{ item.title }}</span>
@@ -47,11 +46,7 @@ export default {
       }
     }
   },
-  methods: {
-    selectMenu(item) {
-      this.$store.commit("addTab", item)
-    }
-  }
+  methods: {}
 }
 </script>
 
