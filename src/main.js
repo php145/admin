@@ -14,7 +14,7 @@ Vue.config.productionTip = false
 Vue.use(Element)
 /*Vue.use(VueAxios, axios)*/
 
-// require("./mock.js")
+require("./mock.js")
 require("./globalFun.js")
 
 new Vue({

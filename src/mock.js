@@ -36,6 +36,13 @@ Mock.mock('/sys/menu/nav', 'get', () => {
 
     let nav = [
         {
+            title: '村管理',
+            name: 'VillageMag',
+            icon: 'el-icon-notebook-2',
+            path: '/sys/VillageManage',
+            component: '/VillageManage',
+            children: []
+        }, {
             name: 'SysMange',
             title: '系统管理',
             icon: 'el-icon-s-operation',

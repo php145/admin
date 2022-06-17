@@ -256,6 +256,7 @@ export default {
           size: this.size
         }
       }).then(res => {
+        console.log(res.data.data)
         this.tableData = res.data.data.records
         this.size = res.data.data.size
         this.current = res.data.data.current
