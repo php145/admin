@@ -15,21 +15,32 @@
       </el-menu-item>
     </router-link>
 
-    <el-submenu :index="menu.name" v-for="menu in menuList" v-bind:key="menu.name" v-if="menu.children.size() >0">
-      <template slot="title">
-        <i :class="menu.icon"></i>
-        <span>{{ menu.title }}</span>
-      </template>
-      <router-link :to="item.path" v-for="item in menu.children" v-bind:key="item.name">
-        <el-menu-item :index="item.name">
+    <div v-for="menu in menuList" v-bind:key="menu.name">
+      <router-link :to="menu.path" v-if="menu.path != ''">
+        <el-menu-item :index="menu.name">
           <template slot="title">
-            <i :class="item.icon"></i>
-            <span slot="title">{{ item.title }}</span>
+            <i :class="menu.icon"></i>
+            <span slot="title">{{ menu.title }}</span>
           </template>
         </el-menu-item>
       </router-link>
 
-    </el-submenu>
+      <el-submenu :index="menu.name" v-else>
+        <template slot="title">
+          <i :class="menu.icon"></i>
+          <span>{{ menu.title }}</span>
+        </template>
+        <router-link :to="item.path" v-for="item in menu.children" v-bind:key="item.name">
+          <el-menu-item :index="item.name">
+            <template slot="title">
+              <i :class="item.icon"></i>
+              <span slot="title">{{ item.title }}</span>
+            </template>
+          </el-menu-item>
+        </router-link>
+
+      </el-submenu>
+    </div>
   </el-menu>
 </template>
 
@@ -42,6 +53,7 @@ export default {
   computed: {
     menuList: {
       get() {
+        // console.log(this.$store.state.menus.menuList)
         return this.$store.state.menus.menuList
       }
     }

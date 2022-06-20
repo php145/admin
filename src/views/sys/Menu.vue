@@ -96,7 +96,7 @@
 
         <el-form-item label="上级菜单" prop="parentId">
           <el-select v-model="editForm.parentId" placeholder="请选择上级菜单">
-            <template v-for="item in tableData">
+            <template v-for="item in newMenuSelectData">
               <el-option :label="item.name" :value="item.id" v-bind:key="item.name"></el-option>
               <template v-for="child in item.children">
                 <el-option :label="child.name" :value="child.id" v-bind:key="child.name">
@@ -163,7 +163,9 @@ export default {
   data() {
     return {
       dialogVisible: false,
-      editForm: {},
+      editForm: {
+        parentId: 0
+      },
       editFormRules: {
         parentId: [
           {required: true, message: '请选择上级菜单', trigger: 'blur'}
@@ -184,7 +186,9 @@ export default {
           {required: true, message: '请选择状态', trigger: 'blur'}
         ]
       },
-      tableData: []
+      tableData: [],
+      newMenuSelectData: [],
+
     }
   }, created() {
     this.getMenuTree()
@@ -193,6 +197,12 @@ export default {
     getMenuTree() {
       this.$axios.get("/sys/menu/list").then(res => {
         this.tableData = res.data.data
+        this.newMenuSelectData = [{
+          id: 0,
+          name: "无",
+          parentId: 0
+        }].concat(this.tableData)
+        console.log(this.newMenuSelectData)
       })
     },
     submitForm(formName) {

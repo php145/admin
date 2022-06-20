@@ -10,7 +10,6 @@ import Index from "@/views/Index";
 import store from "../store"
 
 import axios from '../axios';
-import VillageManage from "@/views/sys/VillageManage";
 
 Vue.use(VueRouter)
 
@@ -30,12 +29,14 @@ const routes = [
                 name: 'UserCenter',
                 meta: {title: "个人中心"},
                 component: () => import('../views/UserCenter')
-            }, {
-                path: '/villageMag',
-                name: 'VillageMag',
-                meta: {title: "村管理"},
-                component: VillageManage
             }
+            // , {
+            //     path: '/villageMag',
+            //     name: 'VillageMag',
+            //     meta: {title: "村管理"},
+            //     component: VillageManage
+            // }
+
 
             // , {
             //     path: '/sys/users',
@@ -93,10 +94,17 @@ router.beforeEach((to, from, next) => {
 
 
             res.data.data.nav.forEach(menu => {
+                console.log(menu.component)
+                if (menu.component != '') {
+                    let route = menuToRoute(menu)
+                    if (route) {
+                        //newRoutes[0].children.push(route)
+                        router.addRoute('Home', route)
+                    }
+                }
                 if (menu.children) {
                     menu.children.forEach(e => {
                         let route = menuToRoute(e)
-
                         if (route) {
                             //newRoutes[0].children.push(route)
                             router.addRoute('Home', route)
