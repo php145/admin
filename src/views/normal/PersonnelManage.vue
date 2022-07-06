@@ -23,16 +23,27 @@
           <el-button type="danger" slot="reference" :disabled="delBtlStatu">批量删除</el-button>
         </el-popconfirm>
       </el-form-item>
-      <template >
-        <el-select v-model="value" filterable placeholder="请选择村">
-          <el-option
-              v-for="item in options"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value">
-          </el-option>
-        </el-select>
-      </template>
+      <div style="float: right">
+        <el-form-item>
+          <el-select v-model="value" filterable placeholder="请选择村">
+            <el-option
+                v-for="item in options"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" icon="el-icon-plus" circle @click="newVillageDialogVisible = true"></el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" icon="el-icon-edit" circle></el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="danger" icon="el-icon-delete" circle></el-button>
+        </el-form-item>
+      </div>
     </el-form>
 
 
@@ -117,33 +128,24 @@
 
     </el-dialog>
 
+    <!--新增对话框-->
+    <el-dialog title="新增村"
+               width="500px"
+               :visible.sync="newVillageDialogVisible">
 
-    <el-dialog
-        title="分配权限"
-        :visible.sync="permDialogVisible"
-        width="600px">
-
-      <el-form :mbodel="permForm">
-
-        <el-tree
-            :data="permTreeData"
-            show-checkbox
-            ref="permTree"
-            :default-expand-all=true
-            node-key="id"
-            :check-strictly=false
-            :props="defaultProps">
-        </el-tree>
+      <el-form :model="newVillageForm"
+               :rules="newVillageRules"
+               ref="newVillageForm"
+      >
+        <el-form-item label="村名" :label-width="formLabelWidth" prop="villageName">
+          <el-input v-model="newVillageForm.villageName" autocomplete="off" label-width="100px"></el-input>
+        </el-form-item>
       </el-form>
-
-      <span slot="footer" class="dialog-footer">
-          <el-button @click="permDialogVisible = false">取 消</el-button>
-          <el-button type="primary" @click="submitPermFormHandle()">确 定</el-button>
-			</span>
-
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitSaveFrom('newVillageForm')">确 定</el-button>
+        <el-button @click="resetForm('newVillageForm')">重 置</el-button>
+      </div>
     </el-dialog>
-
-
   </div>
 </template>
 
@@ -184,10 +186,20 @@ export default {
         children: 'children',
         label: 'name'
       },
-      permTreeData: []
+      permTreeData: [],
+      newVillageDialogVisible: false,
+      newVillageForm: {
+        villageName: ''
+      },
+      newVillageRules: {
+        villageName: [
+          {required: true, message: '请输入村名', trigger: 'blur'}
+        ]
+      },
+      formLabelWidth: '120px'
     }
   }, created() {
-    this.getRoleList()
+    this.getVillageList()
 
     this.$axios.get('/sys/menu/list').then(res => {
       this.permTreeData = res.data.data
@@ -231,14 +243,8 @@ export default {
       this.resetForm('editForm')
     },
 
-    getRoleList() {
-      this.$axios.get("/sys/role/list", {
-        params: {
-          name: this.searchForm.name,
-          current: this.current,
-          size: this.size
-        }
-      }).then(res => {
+    getVillageList() {
+      this.$axios.get("/village/list").then(res => {
         console.log(res.data.data)
         this.tableData = res.data.data.records
         this.size = res.data.data.size
@@ -246,25 +252,23 @@ export default {
         this.total = res.data.data.total
       })
     },
-
-    submitForm(formName) {
+    submitSaveFrom(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          this.$axios.post('/sys/role/' + (this.editForm.id ? 'update' : 'save'), this.editForm)
-              .then(() => {
+          this.$axios.post('/village/save', this.newVillageForm).then(() => {
 
-                this.$message({
-                  showClose: true,
-                  message: '恭喜你，操作成功',
-                  type: 'success',
-                  onClose: () => {
-                    this.getRoleList()
-                  }
-                });
+            this.$message({
+              showClose: true,
+              message: '恭喜你，操作成功',
+              type: 'success',
+              onClose: () => {
+                this.getRoleList()
+              }
+            });
 
-                this.dialogVisible = false
-                this.resetForm(formName)
-              })
+            this.newVillageDialogVisible = false
+            this.resetForm(formName)
+          })
         } else {
           console.log('error submit!!');
           return false;
