@@ -1,6 +1,7 @@
 <template>
   <div>
     <el-form :inline="true">
+
       <el-form-item>
         <el-input
             v-model="searchForm.name"
@@ -22,7 +23,18 @@
           <el-button type="danger" slot="reference" :disabled="delBtlStatu">批量删除</el-button>
         </el-popconfirm>
       </el-form-item>
+      <template >
+        <el-select v-model="value" filterable placeholder="请选择村">
+          <el-option
+              v-for="item in options"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+          </el-option>
+        </el-select>
+      </template>
     </el-form>
+
 
     <el-table
         :data="tableData"
@@ -137,7 +149,7 @@
 
 <script>
 export default {
-  name: "RoleView",
+  name: "PersonnelManage",
   data() {
     return {
       searchForm: {},

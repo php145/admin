@@ -38,7 +38,6 @@
             </template>
           </el-menu-item>
         </router-link>
-
       </el-submenu>
     </div>
   </el-menu>
