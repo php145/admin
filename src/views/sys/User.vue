@@ -316,7 +316,6 @@ export default {
     editHandle(id) {
       this.$axios.get('/sys/user/info/' + id).then(res => {
         this.editForm = res.data.data
-
         this.dialogVisible = true
       })
     },

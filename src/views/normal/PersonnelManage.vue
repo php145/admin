@@ -25,12 +25,12 @@
       </el-form-item>
       <div style="float: right">
         <el-form-item>
-          <el-select v-model="value" filterable placeholder="请选择村">
+          <el-select v-model="selectValue" filterable placeholder="请选择村" @change="selectChange">
             <el-option
-                v-for="item in options"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
+                v-for="item in villageList"
+                :key="item.id"
+                :label="item.villageName"
+                :value="item.id">
             </el-option>
           </el-select>
         </el-form-item>
@@ -38,7 +38,7 @@
           <el-button type="primary" icon="el-icon-plus" circle @click="newVillageDialogVisible = true"></el-button>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" icon="el-icon-edit" circle></el-button>
+          <el-button type="primary" icon="el-icon-edit" circle @click="editVillage(selectValue)"></el-button>
         </el-form-item>
         <el-form-item>
           <el-button type="danger" icon="el-icon-delete" circle></el-button>
@@ -46,7 +46,7 @@
       </div>
     </el-form>
 
-
+    <!--中间的表格-->
     <el-table
         :data="tableData"
         style="width: 100%;margin-bottom: 20px;"
@@ -79,7 +79,7 @@
       </el-table-column>
     </el-table>
 
-
+    <!--分页插件-->
     <el-pagination
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
@@ -90,47 +90,10 @@
         :total="total">
     </el-pagination>
 
-
     <!--新增对话框-->
-    <el-dialog
-        title="提示"
-        :visible.sync="dialogVisible"
-        width="600px"
-        :before-close="handleClose">
-
-      <el-form :model="editForm" :rules="editFormRules" ref="editForm" label-width="100px" class="demo-editForm">
-
-        <el-form-item label="角色名称" prop="name" label-width="100px">
-          <el-input v-model="editForm.name" autocomplete="off"></el-input>
-        </el-form-item>
-
-        <el-form-item label="唯一编码" prop="code" label-width="100px">
-          <el-input v-model="editForm.code" autocomplete="off"></el-input>
-        </el-form-item>
-
-        <el-form-item label="描述" prop="remark" label-width="100px">
-          <el-input v-model="editForm.remark" autocomplete="off"></el-input>
-        </el-form-item>
-
-
-        <el-form-item label="状态" prop="statu" label-width="100px">
-          <el-radio-group v-model="editForm.statu">
-            <el-radio :label=0>禁用</el-radio>
-            <el-radio :label=1>正常</el-radio>
-          </el-radio-group>
-        </el-form-item>
-
-        <el-form-item>
-          <el-button type="primary" @click="submitForm('editForm')">立即创建</el-button>
-          <el-button @click="resetForm('editForm')">重置</el-button>
-        </el-form-item>
-      </el-form>
-
-    </el-dialog>
-
-    <!--新增对话框-->
-    <el-dialog title="新增村"
+    <el-dialog :title="`${newVillageForm.id>0?'编辑村':'新增村'}`"
                width="500px"
+               :before-close="handleClose"
                :visible.sync="newVillageDialogVisible">
 
       <el-form :model="newVillageForm"
@@ -146,6 +109,7 @@
         <el-button @click="resetForm('newVillageForm')">重 置</el-button>
       </div>
     </el-dialog>
+
   </div>
 </template>
 
@@ -162,8 +126,6 @@ export default {
       current: 1,
 
       dialogVisible: false,
-      editForm: {},
-
       tableData: [],
 
       editFormRules: {
@@ -196,16 +158,28 @@ export default {
           {required: true, message: '请输入村名', trigger: 'blur'}
         ]
       },
-      formLabelWidth: '120px'
+      formLabelWidth: '120px',
+      villageList: [],
+      selectValue: 1
     }
   }, created() {
     this.getVillageList()
-
-    this.$axios.get('/sys/menu/list').then(res => {
-      this.permTreeData = res.data.data
-    })
   },
   methods: {
+    editVillage(id) {
+      this.$axios.get("/village/info/" + id).then(res => {
+        this.newVillageForm = res.data.data;
+        this.newVillageDialogVisible = true;
+      })
+    },
+    getVillageList() {
+      this.$axios.get("/village/list").then(res => {
+        this.villageList = res.data.data;
+      })
+    },
+    selectChange(val) {
+      console.log(val + " " + this.selectValue)
+    },
     toggleSelection(rows) {
       if (rows) {
         rows.forEach(row => {
@@ -222,7 +196,6 @@ export default {
 
       this.delBtlStatu = val.length == 0
     },
-
     handleSizeChange(val) {
       console.log(`每页 ${val} 条`);
       this.size = val
@@ -236,39 +209,30 @@ export default {
 
     resetForm(formName) {
       this.$refs[formName].resetFields();
-      this.dialogVisible = false
-      this.editForm = {}
+      this.newVillageDialogVisible = false
+      this.newVillageForm = {}
     },
     handleClose() {
-      this.resetForm('editForm')
-    },
-
-    getVillageList() {
-      this.$axios.get("/village/list").then(res => {
-        console.log(res.data.data)
-        this.tableData = res.data.data.records
-        this.size = res.data.data.size
-        this.current = res.data.data.current
-        this.total = res.data.data.total
-      })
+      this.resetForm('newVillageForm')
     },
     submitSaveFrom(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          this.$axios.post('/village/save', this.newVillageForm).then(() => {
+          this.$axios.post(
+              '/village/' + (this.newVillageForm.id ? 'update' : 'save'), this.newVillageForm)
+              .then(() => {
+                this.$message({
+                  showClose: true,
+                  message: '恭喜你，操作成功',
+                  type: 'success',
+                  onClose: () => {
+                    this.getRoleList()
+                  }
+                });
 
-            this.$message({
-              showClose: true,
-              message: '恭喜你，操作成功',
-              type: 'success',
-              onClose: () => {
-                this.getRoleList()
-              }
-            });
-
-            this.newVillageDialogVisible = false
-            this.resetForm(formName)
-          })
+                this.newVillageDialogVisible = false
+                this.resetForm(formName)
+              })
         } else {
           console.log('error submit!!');
           return false;
