@@ -40,13 +40,11 @@
         <el-form-item>
           <el-button type="primary" icon="el-icon-edit" circle @click="editVillage(selectValue)"></el-button>
         </el-form-item>
-        <el-popconfirm title="确定删除吗？" @confirm="deleteVillage(selectValue)">
-          <el-form-item>
-
-            <el-button type="danger" icon="el-icon-delete" circle></el-button>
-
-          </el-form-item>
-        </el-popconfirm>
+        <template>
+          <el-popconfirm title="确定删除吗？" @confirm="deleteVillage(selectValue)">
+            <el-button type="danger" icon="el-icon-delete" slot="reference" circle></el-button>
+          </el-popconfirm>
+        </template>
       </div>
     </el-form>
 
@@ -171,8 +169,17 @@ export default {
   },
   methods: {
     deleteVillage(id) {
-      this.$axios.get("/village/delete/" + id).then(res => {
-        this.newVillageForm = res.data.data;
+      this.$axios.post("/village/delete/" + id).then(res => {
+        console.log(res.data.data)
+        this.$message({
+          showClose: true,
+          message: '恭喜你，操作成功',
+          type: 'success',
+          onClose: () => {
+            this.getVillageList()
+
+          }
+        });
       })
     },
     editVillage(id) {
@@ -184,6 +191,8 @@ export default {
     getVillageList() {
       this.$axios.get("/village/list").then(res => {
         this.villageList = res.data.data;
+        this.selectValue = res.data.data[0].id;
+        console.log()
       })
     },
     selectChange(val) {
