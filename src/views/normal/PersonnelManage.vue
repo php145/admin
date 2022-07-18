@@ -47,40 +47,81 @@
         </template>
       </div>
     </el-form>
+    <template>
+      <!--中间的表格-->
+      <el-table
+          :data="tableData"
+          ref="multipleTable"
+          @select-all="selectAll"
+          @select="selectTr"
+          style="width: 100%;margin-bottom: 20px;"
+          row-key="id"
+          border
+          default-expand-all
+          @selection-change="handleSelectionChange"
+          :tree-props="{children: 'children', hasChildren: 'hasChildren'}">
 
-    <!--中间的表格-->
-    <el-table
-        :data="tableData"
-        style="width: 100%;margin-bottom: 20px;"
-        row-key="id"
-        border
-        default-expand-all
-        @selection-change="handleSelectionChange"
-        :tree-props="{children: 'children', hasChildren: 'hasChildren'}">
+        <el-table-column
+            type="selection"
+            width="40">
+        </el-table-column>
 
-      <el-table-column
-          type="selection"
-          width="55">
-      </el-table-column>
+        <el-table-column
+            prop="name"
+            label="姓名"
+            fixed
+            width="100">
+        </el-table-column>
+        <el-table-column
+            prop="relation"
+            label="与户主关系"
+            width="100">
+        </el-table-column>
+        <el-table-column
+            prop="idCard"
+            width="200"
+            label="身份证">
+        </el-table-column>
+        <el-table-column
+            prop="birthday"
+            label="出生日期">
+        </el-table-column>
+        <el-table-column
+            prop="gender"
+            label="性别">
+        </el-table-column>
+        <el-table-column
+            prop="age"
+            label="年龄">
+        </el-table-column>
+        <el-table-column
+            prop="location"
+            label="户籍地">
+        </el-table-column>
+        <el-table-column
+            prop="isOffice"
+            label="是否公职人员">
+        </el-table-column>
 
-      <el-table-column
-          prop="date"
-          label="日期"
-          sortable
-          width="180">
-      </el-table-column>
-      <el-table-column
-          prop="name"
-          label="姓名"
-          sortable
-          width="180">
-      </el-table-column>
-      <el-table-column
-          prop="address"
-          label="地址">
-      </el-table-column>
-    </el-table>
+        <el-table-column
+            prop="icon"
+            label="操作"
+            width="180">
 
+          <template slot-scope="scope">
+            <el-button
+                size="mini"
+                @click="editHandle(scope.row.id)">编辑
+            </el-button>
+            <el-divider direction="vertical"></el-divider>
+            <el-popconfirm title="这一段内容确定删除吗？" @confirm="delHandle(scope.row.id)">
+              <el-button type="danger" size="mini" slot="reference">删除</el-button>
+            </el-popconfirm>
+          </template>
+        </el-table-column>
+
+      </el-table>
+    </template>
     <!--分页插件-->
     <el-pagination
         @size-change="handleSizeChange"
@@ -166,22 +207,9 @@ export default {
     }
   }, created() {
     this.getVillageList()
+    this.getPersonnelList(this.selectValue);
   },
   methods: {
-    deleteVillage(id) {
-      this.$axios.post("/village/delete/" + id).then(res => {
-        console.log(res.data.data)
-        this.$message({
-          showClose: true,
-          message: '恭喜你，操作成功',
-          type: 'success',
-          onClose: () => {
-            this.getVillageList()
-
-          }
-        });
-      })
-    },
     editVillage(id) {
       this.$axios.get("/village/info/" + id).then(res => {
         this.newVillageForm = res.data.data;
@@ -192,20 +220,16 @@ export default {
       this.$axios.get("/village/list").then(res => {
         this.villageList = res.data.data;
         this.selectValue = res.data.data[0].id;
-        console.log()
+      })
+    },
+    getPersonnelList(val) {
+      this.$axios.get("/personnel/list/" + val).then(res => {
+        this.tableData = res.data.data
+        console.log(this.tableData)
       })
     },
     selectChange(val) {
-      console.log(val + " " + this.selectValue)
-    },
-    toggleSelection(rows) {
-      if (rows) {
-        rows.forEach(row => {
-          this.$refs.multipleTable.toggleRowSelection(row);
-        });
-      } else {
-        this.$refs.multipleTable.clearSelection();
-      }
+      this.getPersonnelList(val)
     },
     handleSelectionChange(val) {
       console.log("勾选")
@@ -258,69 +282,25 @@ export default {
         }
       });
     },
-    editHandle(id) {
-      this.$axios.get('/sys/role/info/' + id).then(res => {
-
-        this.editForm = res.data.data
-
-        this.dialogVisible = true
-      })
-    },
-    delHandle(id) {
-
-      var ids = []
-
-      if (id) {
-        ids.push(id)
-      } else {
-        this.multipleSelection.forEach(row => {
-          ids.push(row.id)
-        })
-      }
-
-      console.log(ids)
-
-      this.$axios.post("/sys/role/delete", ids).then(() => {
-        this.$message({
-          showClose: true,
-          message: '恭喜你，操作成功',
-          type: 'success',
-          onClose: () => {
-            this.getRoleList()
-          }
-        });
-      })
-    },
-    permHandle(id) {
-      this.permDialogVisible = true
-
-      this.$axios.get("/sys/role/info/" + id).then(res => {
-
+    deleteVillage(id) {
+      this.$axios.post("/village/delete/" + id).then(res => {
         console.log(res.data.data)
-
-        this.$refs.permTree.setCheckedKeys(res.data.data.menuIds, false)
-
-        console.log(this.$refs.permTree)
-        this.permForm = res.data.data
-      })
-    },
-
-    submitPermFormHandle() {
-      var menuIds = this.$refs.permTree.getCheckedKeys()
-
-      console.log(menuIds)
-
-      this.$axios.post('/sys/role/perm/' + this.permForm.id, menuIds).then(() => {
         this.$message({
           showClose: true,
           message: '恭喜你，操作成功',
           type: 'success',
           onClose: () => {
-            this.getRoleList()
+            this.getVillageList()
           }
         });
-        this.permDialogVisible = false
-        // this.resetForm(formName)
+      })
+    },
+    selectAll() {
+
+    },
+    toggleSelection(rows) {
+      rows.forEach(row => {
+        this.$refs.multipleTable.toggleAllSelection(row);
       })
     }
   }
