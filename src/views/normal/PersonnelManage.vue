@@ -210,16 +210,11 @@ export default {
     this.getPersonnelList(this.selectValue);
   },
   methods: {
-    editVillage(id) {
-      this.$axios.get("/village/info/" + id).then(res => {
-        this.newVillageForm = res.data.data;
-        this.newVillageDialogVisible = true;
-      })
-    },
     getVillageList() {
       this.$axios.get("/village/list").then(res => {
-        this.villageList = res.data.data;
+        this.villageList = res.data.data
         this.selectValue = res.data.data[0].id;
+        // console.log(this.villageList)
       })
     },
     getPersonnelList(val) {
@@ -228,14 +223,19 @@ export default {
         console.log(this.tableData)
       })
     },
+    editVillage(id) {
+      this.$axios.get("/village/info/" + id).then(res => {
+        this.newVillageForm = res.data.data;
+        this.newVillageDialogVisible = true;
+      })
+    },
     selectChange(val) {
       this.getPersonnelList(val)
     },
     handleSelectionChange(val) {
-      console.log("勾选")
+      // console.log("勾选")
       console.log(val)
       this.multipleSelection = val;
-
       this.delBtlStatu = val.length == 0
     },
     handleSizeChange(val) {
@@ -248,7 +248,6 @@ export default {
       this.current = val
       this.getRoleList()
     },
-
     resetForm(formName) {
       this.$refs[formName].resetFields();
       this.newVillageDialogVisible = false
@@ -296,12 +295,28 @@ export default {
       })
     },
     selectAll() {
+      // this.data = this.tableData;
 
+      // this.toggleSelect(this.data, "all")
     },
-    toggleSelection(rows) {
-      rows.forEach(row => {
-        this.$refs.multipleTable.toggleAllSelection(row);
-      })
+    toggleSelect(data, type) {
+      if (type == "all") {
+        if (data.length > 0) {
+          data.forEach((item) => {
+                this.toggleSelection(item, true)
+                if (item.children && item.children.length > 0) {
+                }
+              }
+          )
+        }
+      }
+    },
+    toggleSelection(row, flag) {
+      if (flag) {
+        this.$refs.multipleTable.toggleAllSelection(row, flag);
+      } else {
+        this.$refs.multipleTable.clearSelection();
+      }
     }
   }
 }
