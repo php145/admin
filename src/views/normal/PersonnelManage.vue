@@ -213,13 +213,13 @@ export default {
     getVillageList() {
       this.$axios.get("/village/list").then(res => {
         this.villageList = res.data.data
-        this.selectValue = res.data.data[0].id;
+        this.selectValue = this.villageList[0].id;
         // console.log(this.villageList)
       })
     },
     getPersonnelList(val) {
       this.$axios.get("/personnel/list/" + val).then(res => {
-        this.tableData = res.data.data
+        this.tableData = res.data.data.records
         console.log(this.tableData)
       })
     },
@@ -299,18 +299,19 @@ export default {
 
       // this.toggleSelect(this.data, "all")
     },
-    toggleSelect(data, type) {
-      if (type == "all") {
-        if (data.length > 0) {
-          data.forEach((item) => {
-                this.toggleSelection(item, true)
-                if (item.children && item.children.length > 0) {
-                }
-              }
-          )
-        }
-      }
-    },
+    // toggleSelect(data, type) {
+    //   if (type == "all") {
+    //     if (data.length > 0) {
+    //       data.forEach((item) => {
+    //             this.toggleSelection(item, true)
+    //             if (item.children && item.children.length > 0) {
+    //
+    //             }
+    //           }
+    //       )
+    //     }
+    //   }
+    // },
     toggleSelection(row, flag) {
       if (flag) {
         this.$refs.multipleTable.toggleAllSelection(row, flag);
