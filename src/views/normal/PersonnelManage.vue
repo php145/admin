@@ -304,10 +304,10 @@ export default {
     //     if (data.length > 0) {
     //       data.forEach((item) => {
     //             this.toggleSelection(item, true)
-    //             if (item.children && item.children.length > 0) {
+    //             if (item.children &&   item.children.length > 0) {
     //
     //             }
-    //           }
+    //           }  
     //       )
     //     }
     //   }
