@@ -52,24 +52,32 @@
       <el-table
           :data="tableData"
           ref="multipleTable"
+          style="width: 100%;margin-bottom: 20px"
           @select-all="selectAll"
           @select="selectTr"
-          style="width: 100%;margin-bottom: 20px;"
+          :indent="indent"
           row-key="id"
           border
           default-expand-all
           @selection-change="handleSelectionChange"
           :tree-props="{children: 'children', hasChildren: 'hasChildren'}">
 
-        <el-table-column
-            type="selection"
-            width="40">
+        <el-table-column width="75"
+                         fixed>
+          <template slot="header" >
+            <el-checkbox/>
+          </template>
+          <template v-slot:scope>
+            <el-checkbox
+                v-if="scope.row.childs"
+                
+            />
+          </template>
         </el-table-column>
 
         <el-table-column
             prop="name"
             label="姓名"
-            fixed
             width="100">
         </el-table-column>
         <el-table-column
@@ -161,9 +169,10 @@ export default {
   name: "PersonnelManage",
   data() {
     return {
+
       searchForm: {},
       delBtlStatu: true,
-
+      indent: 16,
       total: 0,
       size: 10,
       current: 1,
@@ -295,23 +304,8 @@ export default {
       })
     },
     selectAll() {
-      // this.data = this.tableData;
 
-      // this.toggleSelect(this.data, "all")
     },
-    // toggleSelect(data, type) {
-    //   if (type == "all") {
-    //     if (data.length > 0) {
-    //       data.forEach((item) => {
-    //             this.toggleSelection(item, true)
-    //             if (item.children &&   item.children.length > 0) {
-    //
-    //             }
-    //           }  
-    //       )
-    //     }
-    //   }
-    // },
     toggleSelection(row, flag) {
       if (flag) {
         this.$refs.multipleTable.toggleAllSelection(row, flag);
