@@ -1,30 +1,33 @@
 <template>
   <el-container>
-    <el-header>
-      <strong>后台管理系统</strong>
-      <div class="header-avatar">
-        <el-avatar size="medium"
-                   :src="userInfo.avatar"></el-avatar>
-        <el-dropdown>
+    <el-aside width="200px">
+      <side-menu></side-menu>
+    </el-aside>
+
+    <el-container>
+
+      <el-header>
+        <strong>后台管理系统</strong>
+        <div class="header-avatar">
+          <el-avatar size="medium"
+                     :src="userInfo.avatar"></el-avatar>
+          <el-dropdown>
             <span class="el-dropdown-link">
               {{ userInfo.username }}<i class="el-icon-arrow-down el-icon--right"></i>
             </span>
-          <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item>
-              <router-link :to="{name:'UserCenter'}">个人中心</router-link>
-            </el-dropdown-item>
-            <el-dropdown-item @click.native="logout">退出</el-dropdown-item>
-          </el-dropdown-menu>
-        </el-dropdown>
-      </div>
-    </el-header>
-    <el-container>
-      <el-aside width="200px">
-        <side-menu></side-menu>
-      </el-aside>
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item>
+                <router-link :to="{name:'UserCenter'}">个人中心</router-link>
+              </el-dropdown-item>
+              <el-dropdown-item @click.native="logout">退出</el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
 
+        </div>
+      </el-header>
+      <tabs></tabs>
       <el-main>
-        <tabs></tabs>
+
         <div style="margin: 0 15px">
           <router-view></router-view>
         </div>

@@ -53,24 +53,29 @@
           :data="tableData"
           ref="multipleTable"
           style="width: 100%;margin-bottom: 20px"
-          @select-all="selectAll"
           @select="selectTr"
           :indent="indent"
           row-key="id"
           border
           default-expand-all
-          @selection-change="handleSelectionChange"
           :tree-props="{children: 'children', hasChildren: 'hasChildren'}">
 
         <el-table-column width="75"
                          fixed>
-          <template slot="header" >
-            <el-checkbox/>
+          <template slot="header">
+            <el-checkbox v-model="checkedAll" @change="changeAllSelect"/>
           </template>
-          <template v-slot:scope>
+          <template slot-scope="scope">
             <el-checkbox
-                v-if="scope.row.childs"
-                
+                v-if="scope.row.children"
+                :indeterminate="scope.row.indeterminate"
+                v-model="scope.row.checked"
+                @change="changeRowSelect(scope.row)"
+            />
+            <el-checkbox
+                v-else
+                v-model="scope.row.checked"
+                @change="changeRowSelect(scope.row)"
             />
           </template>
         </el-table-column>
@@ -170,8 +175,10 @@ export default {
   data() {
     return {
 
+
       searchForm: {},
       delBtlStatu: true,
+      //分页参数
       indent: 16,
       total: 0,
       size: 10,
@@ -191,9 +198,6 @@ export default {
           {required: true, message: '请选择状态', trigger: 'blur'}
         ]
       },
-
-      multipleSelection: [],
-
       permDialogVisible: false,
       permForm: {},
       defaultProps: {
@@ -212,7 +216,8 @@ export default {
       },
       formLabelWidth: '120px',
       villageList: [],
-      selectValue: 1
+      selectValue: 1,
+      checkedAll: false,
     }
   }, created() {
     this.getVillageList()
@@ -229,7 +234,6 @@ export default {
     getPersonnelList(val) {
       this.$axios.get("/personnel/list/" + val).then(res => {
         this.tableData = res.data.data.records
-        console.log(this.tableData)
       })
     },
     editVillage(id) {
@@ -240,12 +244,6 @@ export default {
     },
     selectChange(val) {
       this.getPersonnelList(val)
-    },
-    handleSelectionChange(val) {
-      // console.log("勾选")
-      console.log(val)
-      this.multipleSelection = val;
-      this.delBtlStatu = val.length == 0
     },
     handleSizeChange(val) {
       console.log(`每页 ${val} 条`);
@@ -303,15 +301,28 @@ export default {
         });
       })
     },
-    selectAll() {
-
-    },
     toggleSelection(row, flag) {
       if (flag) {
         this.$refs.multipleTable.toggleAllSelection(row, flag);
       } else {
         this.$refs.multipleTable.clearSelection();
       }
+    }, changeAllSelect(val) {
+      console.log(val)
+      const loop = (data) => {
+        data.forEach(item => {
+          item.checked = val
+          if ('indeterminate' in item) {
+            item.indeterminate = false
+          }
+          if (item.children) {
+            loop(item.children)
+          }
+        })
+      }
+      loop(this.tableData)
+      this.checkedAll = true
+      // this.$forceUpdate()
     }
   }
 }
