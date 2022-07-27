@@ -53,7 +53,6 @@
           :data="tableData"
           ref="multipleTable"
           style="width: 100%;margin-bottom: 20px"
-          @select="selectTr"
           :indent="indent"
           row-key="id"
           border
@@ -62,8 +61,8 @@
 
         <el-table-column width="75"
                          fixed>
-          <template slot="header">
-            <el-checkbox v-model="checkedAll" @change="changeAllSelect"/>
+          <template slot="header" slot-scope="scope">
+            <el-checkbox v-model="scope.checkedAll" @change="changeAllSelect"/>
           </template>
           <template slot-scope="scope">
             <el-checkbox
@@ -174,8 +173,6 @@ export default {
   name: "PersonnelManage",
   data() {
     return {
-
-
       searchForm: {},
       delBtlStatu: true,
       //分页参数
@@ -217,7 +214,7 @@ export default {
       formLabelWidth: '120px',
       villageList: [],
       selectValue: 1,
-      checkedAll: false,
+      checkedAll: false
     }
   }, created() {
     this.getVillageList()
@@ -234,6 +231,7 @@ export default {
     getPersonnelList(val) {
       this.$axios.get("/personnel/list/" + val).then(res => {
         this.tableData = res.data.data.records
+        // this.tableData.push([{checkedAll: false}])
       })
     },
     editVillage(id) {
@@ -308,7 +306,9 @@ export default {
         this.$refs.multipleTable.clearSelection();
       }
     }, changeAllSelect(val) {
-      console.log(val)
+      this.checkedAll = val;
+      // console.log(this.$data.checkedAll)
+
       const loop = (data) => {
         data.forEach(item => {
           item.checked = val
@@ -321,8 +321,6 @@ export default {
         })
       }
       loop(this.tableData)
-      this.checkedAll = true
-      // this.$forceUpdate()
     }
   }
 }
