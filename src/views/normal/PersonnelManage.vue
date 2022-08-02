@@ -6,13 +6,12 @@
         <el-input
             v-model="searchForm.name"
             placeholder="名称"
-            clearable
-        >
+            clearable>
         </el-input>
       </el-form-item>
 
       <el-form-item>
-        <el-button @click="getRoleList">搜索</el-button>
+        <el-button>搜索</el-button>
       </el-form-item>
 
       <el-form-item>
@@ -47,15 +46,17 @@
         </template>
       </div>
     </el-form>
-    <template>
+    <template class="table-container" style="height: 100%">
       <!--中间的表格-->
       <el-table
           :data="tableData"
           ref="multipleTable"
-          style="width: 100%;margin-bottom: 20px"
+          style="width: 100%;margin-bottom: 10px"
           :indent="indent"
+          :max-height="elTableHeight"
           row-key="id"
           border
+          class="tableBox"
           default-expand-all
           :tree-props="{children: 'children', hasChildren: 'hasChildren'}">
 
@@ -81,13 +82,11 @@
 
         <el-table-column
             prop="name"
-            label="姓名"
-            width="100">
+            label="姓名">
         </el-table-column>
         <el-table-column
             prop="relation"
-            label="与户主关系"
-            width="100">
+            label="与户主关系">
         </el-table-column>
         <el-table-column
             prop="idCard"
@@ -213,24 +212,41 @@ export default {
       },
       formLabelWidth: '120px',
       villageList: [],
-      selectValue: 1,
-      checkedAll: false
+      selectValue: '',
+      checkedAll: false,
+      elTableHeight: 0
     }
+  },
+  mounted() {
+    this.$nextTick(() => {
+      this.elTableHeight = window.innerHeight - 250
+    })
   }, created() {
     this.getVillageList()
-    this.getPersonnelList(this.selectValue);
-  },
-  methods: {
+  }, methods: {
+
     getVillageList() {
+
       this.$axios.get("/village/list").then(res => {
         this.villageList = res.data.data
         this.selectValue = this.villageList[0].id;
-        // console.log(this.villageList)
+        this.$nextTick(function () {
+          this.getPersonnelList(this.selectValue);
+        })
       })
     },
     getPersonnelList(val) {
-      this.$axios.get("/personnel/list/" + val).then(res => {
+      this.$axios.get("/personnel/list/", {
+        params: {
+          villageId: val,
+          current: this.current,
+          size: this.size
+        }
+      }).then(res => {
         this.tableData = res.data.data.records
+        this.size = res.data.data.size
+        this.current = res.data.data.current
+        this.total = res.data.data.total
         // this.tableData.push([{checkedAll: false}])
       })
     },
@@ -246,12 +262,13 @@ export default {
     handleSizeChange(val) {
       console.log(`每页 ${val} 条`);
       this.size = val
-      this.getRoleList()
+
+      this.getPersonnelList(this.selectValue)
     },
     handleCurrentChange(val) {
       console.log(`当前页: ${val}`);
       this.current = val
-      this.getRoleList()
+      this.getPersonnelList(this.selectValue)
     },
     resetForm(formName) {
       this.$refs[formName].resetFields();
@@ -272,14 +289,12 @@ export default {
                   message: '恭喜你，操作成功',
                   type: 'success',
                   onClose: () => {
-                    this.getRoleList()
+                    this.getVillageList()
                   }
                 });
-
                 this.newVillageDialogVisible = false
                 this.resetForm(formName)
               })
-          this.getVillageList()
         } else {
           console.log('error submit!!');
           return false;
@@ -321,6 +336,45 @@ export default {
         })
       }
       loop(this.tableData)
+    }, changeRowSelect(val) {
+      if (val.children != null && val.children.length > 0) {
+        val.children.forEach(ss => {
+          ss.checked = val.checked
+        })
+      } else {
+        console.log("运行了")
+        let checkedLeg = 0
+        this.tableData.some(item => {
+          if (item.id === val.parentId) {
+            // 获取当前父级下子级选中条数
+            const leg = item.children.length
+            checkedLeg = item.children.filter(ss => ss.checked).length
+            // 根据条数改变父级的indeterminate和checked
+            if (checkedLeg === 0) {
+              item.indeterminate = false
+              item.checked = false
+            } else if (checkedLeg < leg) {
+              item.indeterminate = true
+              item.checked = false
+            } else if (checkedLeg === leg) {
+              item.indeterminate = false
+              item.checked = true
+            }
+
+            return
+          }
+        })
+        // console.log(this.tableData2)
+      }
+      // 判断是否全部选择了,改变全选框的样式
+      let flag = true
+      this.tableData.some(item => {
+        if (!item.checked) {
+          flag = false
+          return
+        }
+      })
+      this.checkedAll = flag
     }
   }
 }
