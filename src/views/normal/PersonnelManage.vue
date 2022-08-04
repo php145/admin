@@ -63,7 +63,9 @@
         <el-table-column width="75"
                          fixed>
           <template slot="header" slot-scope="scope">
-            <el-checkbox v-model="scope.checkedAll" @change="changeAllSelect"/>
+            <el-checkbox v-model="checkedAll"
+                         :indeterminate="checkAllIndeterminate"
+                         @change="changeAllSelect"/>
           </template>
           <template slot-scope="scope">
             <el-checkbox
@@ -170,7 +172,13 @@
 <script>
 export default {
   name: "PersonnelManage",
+
   data() {
+
+    // var vm = new Vue({
+    //
+    // })
+
     return {
       searchForm: {},
       delBtlStatu: true,
@@ -182,7 +190,6 @@ export default {
 
       dialogVisible: false,
       tableData: [],
-
       editFormRules: {
         name: [
           {required: true, message: '请输入角色名称', trigger: 'blur'}
@@ -214,6 +221,7 @@ export default {
       villageList: [],
       selectValue: '',
       checkedAll: false,
+      checkAllIndeterminate: false,
       elTableHeight: 0
     }
   },
@@ -247,7 +255,6 @@ export default {
         this.size = res.data.data.size
         this.current = res.data.data.current
         this.total = res.data.data.total
-        // this.tableData.push([{checkedAll: false}])
       })
     },
     editVillage(id) {
@@ -313,17 +320,7 @@ export default {
           }
         });
       })
-    },
-    toggleSelection(row, flag) {
-      if (flag) {
-        this.$refs.multipleTable.toggleAllSelection(row, flag);
-      } else {
-        this.$refs.multipleTable.clearSelection();
-      }
     }, changeAllSelect(val) {
-      this.checkedAll = val;
-      // console.log(this.$data.checkedAll)
-
       const loop = (data) => {
         data.forEach(item => {
           item.checked = val
@@ -342,15 +339,18 @@ export default {
           ss.checked = val.checked
         })
       } else {
-        console.log("运行了")
+        console.log("运行了" + val.householdId)
         let checkedLeg = 0
+
         this.tableData.some(item => {
-          if (item.id === val.parentId) {
-            // 获取当前父级下子级选中条数
+          if (item.id === val.householdId) {
+            // 获取当前父级下子级选中条数*/
             const leg = item.children.length
             checkedLeg = item.children.filter(ss => ss.checked).length
             // 根据条数改变父级的indeterminate和checked
-            if (checkedLeg === 0) {
+            if (leg == 0 && item.id === item.householdId) {
+              item.checked = val.checked
+            } else if (checkedLeg === 0) {
               item.indeterminate = false
               item.checked = false
             } else if (checkedLeg < leg) {
@@ -360,7 +360,6 @@ export default {
               item.indeterminate = false
               item.checked = true
             }
-
             return
           }
         })
