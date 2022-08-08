@@ -6,25 +6,25 @@
         <el-input
             v-model="searchForm.name"
             placeholder="名称"
-            clearable>
+            clearable size="small">
         </el-input>
       </el-form-item>
 
       <el-form-item>
-        <el-button>搜索</el-button>
+        <el-button size="small">搜索</el-button>
       </el-form-item>
 
       <el-form-item>
-        <el-button type="primary" @click="dialogVisible = true">新增</el-button>
+        <el-button type="primary" @click="addDialogVisible = true" size="small">新增</el-button>
       </el-form-item>
       <el-form-item>
         <el-popconfirm title="确定批量删除吗？" @confirm="delHandle(null)">
-          <el-button type="danger" slot="reference" :disabled="delBtlStatu">批量删除</el-button>
+          <el-button type="danger" slot="reference" :disabled="delBtlStatu" size="small">批量删除</el-button>
         </el-popconfirm>
       </el-form-item>
       <div style="float: right">
         <el-form-item>
-          <el-select v-model="selectValue" filterable placeholder="请选择村" @change="selectChange">
+          <el-select v-model="selectValue" filterable placeholder="请选择村" @change="selectChange" size="small">
             <el-option
                 v-for="item in villageList"
                 :key="item.id"
@@ -34,16 +34,24 @@
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" icon="el-icon-plus" circle @click="newVillageDialogVisible = true"></el-button>
+          <el-button type="primary" icon="el-icon-plus" circle @click="newVillageDialogVisible = true"
+                     size="small"></el-button>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" icon="el-icon-edit" circle @click="editVillage(selectValue)"></el-button>
+          <el-button type="primary" icon="el-icon-edit" circle @click="editVillage(selectValue)"
+                     size="small"></el-button>
         </el-form-item>
-        <template>
-          <el-popconfirm title="确定删除吗？" @confirm="deleteVillage(selectValue)">
-            <el-button type="danger" icon="el-icon-delete" slot="reference" circle></el-button>
-          </el-popconfirm>
-        </template>
+        <el-form-item>
+          <template>
+            <el-popconfirm title="确定删除吗？" @confirm="deleteVillage(selectValue)">
+              <el-button type="danger" icon="el-icon-delete" slot="reference" circle size="small"></el-button>
+            </el-popconfirm>
+          </template>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" icon="el-icon-upload" size="small" circle
+                     @click="uploadDialogVisible = true"></el-button>
+        </el-form-item>
       </div>
     </el-form>
     <template class="table-container" style="height: 100%">
@@ -120,7 +128,6 @@
             prop="icon"
             label="操作"
             width="180">
-
           <template slot-scope="scope">
             <el-button
                 size="mini"
@@ -148,7 +155,7 @@
 
     <!--新增对话框-->
     <el-dialog :title="`${newVillageForm.id>0?'编辑村':'新增村'}`"
-               width="500px"
+               width="34%"
                :before-close="handleClose"
                :visible.sync="newVillageDialogVisible">
 
@@ -166,6 +173,28 @@
       </div>
     </el-dialog>
 
+    <!--上传对话框-->
+    <el-dialog
+        title="提示"
+        :visible.sync="uploadDialogVisible"
+        width="34%"
+        :before-close="handleClose">
+      <el-upload
+          class="upload-demo"
+          drag
+          :file-list="fileList"
+          action="https://jsonplaceholder.typicode.com/posts/"
+          multiple>
+        <i class="el-icon-upload"></i>
+        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+        <div class="el-upload__tip" slot="tip">只能上传jpg/png文件，且不超过500kb</div>
+      </el-upload>
+      <span slot="footer" class="dialog-footer">
+    <el-button @click="uploadDialogVisible = false">取 消</el-button>
+    <el-button type="primary" @click="uploadDialogVisible = false">确 定</el-button>
+  </span>
+    </el-dialog>
+
   </div>
 </template>
 
@@ -174,12 +203,8 @@ export default {
   name: "PersonnelManage",
 
   data() {
-
-    // var vm = new Vue({
-    //
-    // })
-
     return {
+      uploadDialogVisible: false,
       searchForm: {},
       delBtlStatu: true,
       //分页参数
@@ -188,7 +213,7 @@ export default {
       size: 10,
       current: 1,
 
-      dialogVisible: false,
+      addDialogVisible: false,
       tableData: [],
       editFormRules: {
         name: [
@@ -222,7 +247,8 @@ export default {
       selectValue: '',
       checkedAll: false,
       checkAllIndeterminate: false,
-      elTableHeight: 0
+      elTableHeight: 0,
+      fileList: []
     }
   },
   mounted() {
@@ -384,5 +410,11 @@ export default {
 .el-pagination {
   float: right;
   margin-top: 22px;
+}
+
+.el-dialog .el-dialog__body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 </style>
