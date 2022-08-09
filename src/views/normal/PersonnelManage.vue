@@ -49,8 +49,14 @@
           </template>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" icon="el-icon-upload" size="small" circle
-                     @click="uploadDialogVisible = true"></el-button>
+          <el-upload
+              class="upload-demo"
+              :http-request="uploadselectionFile"
+              accept="xlsx,xls"
+              :show-file-list="false">
+            <el-button type="primary" icon="el-icon-upload" size="small" circle></el-button>
+          </el-upload>
+
         </el-form-item>
       </div>
     </el-form>
@@ -64,9 +70,11 @@
           :max-height="elTableHeight"
           row-key="id"
           border
+          v-loading="loading"
           class="tableBox"
           default-expand-all
           :tree-props="{children: 'children', hasChildren: 'hasChildren'}">
+
 
         <el-table-column width="75"
                          fixed>
@@ -140,6 +148,10 @@
           </template>
         </el-table-column>
 
+        <template slot="empty">
+          <el-empty description="暂无数据"></el-empty>
+        </template>
+
       </el-table>
     </template>
     <!--分页插件-->
@@ -182,6 +194,7 @@
       <el-upload
           class="upload-demo"
           drag
+          :on-success="handleChange"
           :file-list="fileList"
           action="https://jsonplaceholder.typicode.com/posts/"
           multiple>
@@ -248,7 +261,8 @@ export default {
       checkedAll: false,
       checkAllIndeterminate: false,
       elTableHeight: 0,
-      fileList: []
+      fileList: [],
+      loading: false
     }
   },
   mounted() {
@@ -346,6 +360,24 @@ export default {
           }
         });
       })
+    }, uploadselectionFile(param) {
+      this.loading = true
+      let form = new FormData()
+      form.append("file", param.file)
+      form.append("villageId", this.selectValue)
+      this.$axios.post("/personnel/import", form).then(res => {
+
+        this.$message({
+          showClose: true,
+          message: '恭喜你，操作成功',
+          type: 'success',
+          onClose: () => {
+
+            this.getPersonnelList(this.selectValue)
+            this.loading = false
+          }
+        })
+      })
     }, changeAllSelect(val) {
       const loop = (data) => {
         data.forEach(item => {
@@ -400,6 +432,11 @@ export default {
         }
       })
       this.checkedAll = flag
+    }, handleChange(response, file, fileList) {
+      console.log(response)
+      console.log(file)
+      console.log(fileList)
+      this.fileList = fileList.slice();
     }
   }
 }
@@ -410,11 +447,5 @@ export default {
 .el-pagination {
   float: right;
   margin-top: 22px;
-}
-
-.el-dialog .el-dialog__body {
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 </style>
