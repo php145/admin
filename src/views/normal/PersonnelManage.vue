@@ -15,7 +15,7 @@
       </el-form-item>
 
       <el-form-item>
-        <el-button type="primary" @click="addDialogVisible = true" size="small">新增</el-button>
+        <el-button type="primary" @click="newPersonnelDialogVisible = true" size="small">新增</el-button>
       </el-form-item>
       <el-form-item>
         <el-popconfirm title="确定批量删除吗？" @confirm="delHandle(null)">
@@ -80,7 +80,6 @@
                          fixed>
           <template slot="header" slot-scope="scope">
             <el-checkbox v-model="checkedAll"
-                         :indeterminate="checkAllIndeterminate"
                          @change="changeAllSelect"/>
           </template>
           <template slot-scope="scope">
@@ -165,7 +164,7 @@
         :total="total">
     </el-pagination>
 
-    <!--新增对话框-->
+    <!--村名新增对话框-->
     <el-dialog :title="`${newVillageForm.id>0?'编辑村':'新增村'}`"
                width="34%"
                :before-close="handleClose"
@@ -185,29 +184,16 @@
       </div>
     </el-dialog>
 
-    <!--上传对话框-->
-    <el-dialog
-        title="提示"
-        :visible.sync="uploadDialogVisible"
-        width="34%"
-        :before-close="handleClose">
-      <el-upload
-          class="upload-demo"
-          drag
-          :on-success="handleChange"
-          :file-list="fileList"
-          action="https://jsonplaceholder.typicode.com/posts/"
-          multiple>
-        <i class="el-icon-upload"></i>
-        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-        <div class="el-upload__tip" slot="tip">只能上传jpg/png文件，且不超过500kb</div>
-      </el-upload>
-      <span slot="footer" class="dialog-footer">
-    <el-button @click="uploadDialogVisible = false">取 消</el-button>
-    <el-button type="primary" @click="uploadDialogVisible = false">确 定</el-button>
-  </span>
-    </el-dialog>
+    <!--村人员新增对话框-->
+    <el-dialog :title="`${newPersonnelForm.id>0?'编辑':'新增'}`"
+               width="34%"
+               :visible.sync="newPersonnelDialogVisible">
 
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitSaveFrom('newVillageForm')">确 定</el-button>
+        <el-button @click="resetForm('newVillageForm')">重 置</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -217,8 +203,9 @@ export default {
 
   data() {
     return {
-      uploadDialogVisible: false,
+      //搜索框表单
       searchForm: {},
+      //批量删除按钮状态
       delBtlStatu: true,
       //分页参数
       indent: 16,
@@ -226,42 +213,30 @@ export default {
       size: 10,
       current: 1,
 
-      addDialogVisible: false,
+      //人员数据新增对话框显示
+      newPersonnelDialogVisible: false,
+      //表格数据
       tableData: [],
-      editFormRules: {
-        name: [
-          {required: true, message: '请输入角色名称', trigger: 'blur'}
-        ],
-        code: [
-          {required: true, message: '请输入唯一编码', trigger: 'blur'}
-        ],
-        statu: [
-          {required: true, message: '请选择状态', trigger: 'blur'}
-        ]
-      },
-      permDialogVisible: false,
-      permForm: {},
-      defaultProps: {
-        children: 'children',
-        label: 'name'
-      },
-      permTreeData: [],
+      //村名新增对话框显示
       newVillageDialogVisible: false,
+      //村子对话框的表单
       newVillageForm: {
         villageName: ''
       },
+      //新增村民对话框的表单
+      newPersonnelForm: {},
+      //村名校验
       newVillageRules: {
         villageName: [
           {required: true, message: '请输入村名', trigger: 'blur'}
         ]
       },
+
       formLabelWidth: '120px',
       villageList: [],
       selectValue: '',
       checkedAll: false,
-      checkAllIndeterminate: false,
       elTableHeight: 0,
-      fileList: [],
       loading: false
     }
   },
@@ -272,9 +247,8 @@ export default {
   }, created() {
     this.getVillageList()
   }, methods: {
-
+    //获取村子列表
     getVillageList() {
-
       this.$axios.get("/village/list").then(res => {
         this.villageList = res.data.data
         this.selectValue = this.villageList[0].id;
@@ -283,6 +257,7 @@ export default {
         })
       })
     },
+    //按村子id获取村子下人员
     getPersonnelList(val) {
       this.$axios.get("/personnel/list/", {
         params: {
@@ -297,34 +272,46 @@ export default {
         this.total = res.data.data.total
       })
     },
+    //村名编辑框
     editVillage(id) {
       this.$axios.get("/village/info/" + id).then(res => {
         this.newVillageForm = res.data.data;
         this.newVillageDialogVisible = true;
       })
     },
+    //村子下拉框改变调用
     selectChange(val) {
       this.getPersonnelList(val)
     },
+    //显示页码
     handleSizeChange(val) {
       console.log(`每页 ${val} 条`);
       this.size = val
 
       this.getPersonnelList(this.selectValue)
     },
+    //显示当前页码
     handleCurrentChange(val) {
       console.log(`当前页: ${val}`);
       this.current = val
       this.getPersonnelList(this.selectValue)
     },
+    //重置表单
     resetForm(formName) {
-      this.$refs[formName].resetFields();
-      this.newVillageDialogVisible = false
-      this.newVillageForm = {}
+      switch (formName) {
+        case "newVillageForm" :
+          this.$refs[formName].resetFields();
+          this.newVillageDialogVisible = false
+          this.newVillageForm = {}
+          break
+
+      }
     },
+    //关闭对话框
     handleClose() {
       this.resetForm('newVillageForm')
     },
+    //提交村名更新或保存的表单
     submitSaveFrom(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
@@ -348,6 +335,7 @@ export default {
         }
       });
     },
+    //根据id删除村名
     deleteVillage(id) {
       this.$axios.post("/village/delete/" + id).then(res => {
         console.log(res.data.data)
@@ -360,7 +348,9 @@ export default {
           }
         });
       })
-    }, uploadselectionFile(param) {
+    },
+    //上传文件
+    uploadselectionFile(param) {
       this.loading = true
       let form = new FormData()
       form.append("file", param.file)
@@ -378,7 +368,9 @@ export default {
           }
         })
       })
-    }, changeAllSelect(val) {
+    },
+    //全选表格
+    changeAllSelect(val) {
       const loop = (data) => {
         data.forEach(item => {
           item.checked = val
@@ -391,7 +383,9 @@ export default {
         })
       }
       loop(this.tableData)
-    }, changeRowSelect(val) {
+    },
+    //选择表格单行数据
+    changeRowSelect(val) {
       if (val.children != null && val.children.length > 0) {
         val.children.forEach(ss => {
           ss.checked = val.checked
@@ -432,11 +426,11 @@ export default {
         }
       })
       this.checkedAll = flag
-    }, handleChange(response, file, fileList) {
-      console.log(response)
-      console.log(file)
-      console.log(fileList)
-      this.fileList = fileList.slice();
+    },
+    //村人员编辑框
+    editHandle(id) {
+      this.newPersonnelDialogVisible = true
+
     }
   }
 }
