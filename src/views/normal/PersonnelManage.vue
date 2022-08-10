@@ -51,6 +51,7 @@
         <el-form-item>
           <el-upload
               class="upload-demo"
+              action="11"
               :http-request="uploadselectionFile"
               accept="xlsx,xls"
               :show-file-list="false">
@@ -167,7 +168,7 @@
     <!--村名新增对话框-->
     <el-dialog :title="`${newVillageForm.id>0?'编辑村':'新增村'}`"
                width="34%"
-               :before-close="handleClose"
+               :before-close="villageHandleClose"
                :visible.sync="newVillageDialogVisible">
 
       <el-form :model="newVillageForm"
@@ -185,22 +186,164 @@
     </el-dialog>
 
     <!--村人员新增对话框-->
-    <el-dialog :title="`${newPersonnelForm.id>0?'编辑':'新增'}`"
-               width="34%"
-               :visible.sync="newPersonnelDialogVisible">
+    <!--    <el-dialog :title="`${personnelForm.id>0?'编辑':'新增'}`"-->
+    <!--               width="34%"-->
+    <!--               :before-close="personnelHandleClose"-->
+    <!--               :close-on-click-modal="false"-->
+    <!--               :visible.sync="newPersonnelDialogVisible">-->
+    <!--      <el-form :model="personnelForm"-->
+    <!--               ref="personnelForm"-->
+    <!--      >-->
 
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitSaveFrom('newVillageForm')">确 定</el-button>
-        <el-button @click="resetForm('newVillageForm')">重 置</el-button>
+    <!--      </el-form>-->
+    <!--      <div slot="footer" class="dialog-footer">-->
+    <!--        <el-button type="primary" @click="submitSaveFrom('personnelForm')">确 定</el-button>-->
+    <!--        <el-button @click="resetForm('personnelForm')">重 置</el-button>-->
+    <!--      </div>-->
+    <!--    </el-dialog>-->
+    <template>
+      <div>
+        <el-dialog v-bind="$attrs"
+                   v-on="$listeners"
+                   @open="onOpen"
+                   :before-close="personnelHandleClose"
+                   :visible.sync="newPersonnelDialogVisible"
+                   @close="onClose"
+                   :title="`${personnelForm.id>0?'编辑':'新增'}`">
+          <el-row :gutter="15">
+            <el-form ref="personnelForm" :model="personnelForm" :rules="rules" size="small" label-width="100px"
+                     label-position="top">
+              <el-col :span="12">
+                <el-form-item label="户主名" prop="houseHoldName">
+                  <el-select v-model="personnelForm.houseHoldName" placeholder="请选择户主名" clearable
+                             :style="{width: '100%'}"></el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="与户主关系" prop="relation">
+                  <el-input v-model="personnelForm.relation" placeholder="请输入与户主关系" clearable
+                            :style="{width: '100%'}"></el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="身份证号" prop="idCard">
+                  <el-input v-model="personnelForm.idCard" placeholder="请输入身份证号" clearable
+                            :style="{width: '100%'}"></el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="姓名" prop="name">
+                  <el-input v-model="personnelForm.name" placeholder="请输入姓名" clearable :style="{width: '100%'}">
+                  </el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="出生日期" prop="birthday">
+                  <el-date-picker v-model="personnelForm.birthday" format="yyyy-MM-dd" value-format="yyyy-MM-dd"
+                                  :style="{width: '100%'}" placeholder="请选择出生日期" clearable></el-date-picker>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="年龄" prop="age">
+                  <el-input-number v-model="personnelForm.age" placeholder="年龄" :step='1'></el-input-number>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="性别" prop="gender">
+                  <el-select v-model="personnelForm.gender" placeholder="请选择性别" clearable
+                             :style="{width: '100%'}">
+                    <el-option v-for="(item, index) in genderOptions" :key="index" :label="item.label"
+                               :value="item.value" :disabled="item.disabled"></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="村（社区）组" prop="location">
+                  <el-input v-model="personnelForm.location" placeholder="请输入村（社区）组" clearable
+                            :style="{width: '100%'}"></el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="结婚日期" prop="weddingDate">
+                  <el-date-picker v-model="personnelForm.weddingDate" format="yyyy-MM-dd"
+                                  value-format="yyyy-MM-dd" :style="{width: '100%'}" placeholder="请选择结婚日期" clearable>
+                  </el-date-picker>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="原耕地面积" prop="curCultivatedArea">
+                  <el-input v-model="personnelForm.oldCultivatedArea" placeholder="请输入原耕地面积" clearable
+                            :style="{width: '100%'}"></el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="现耕地面积" prop="curCultivatedArea">
+                  <el-input v-model="personnelForm.curCultivatedArea" placeholder="请输入现耕地面积" clearable
+                            :style="{width: '100%'}"></el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="现平均耕地面积" prop="curAveArea">
+                  <el-input v-model="personnelForm.curAveArea" placeholder="请输入现平均耕地面积" clearable
+                            :style="{width: '100%'}"></el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="征地补偿公告日期时年龄" prop="announcementDateAge">
+                  <el-input-number v-model="personnelForm.announcementDateAge" placeholder="征地补偿公告日期时年龄"
+                                   :step='1'></el-input-number>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="是否已在省外领取养老待遇" prop="isProvincesPensionTreatment">
+                  <el-select v-model="personnelForm.isProvincesPensionTreatment" placeholder="请选择是否已在省外领取养老待遇"
+                             clearable :style="{width: '100%'}">
+                    <el-option v-for="(item, index) in isProvincesPensionTreatmentOptions" :key="index"
+                               :label="item.label" :value="item.value" :disabled="item.disabled"></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="参保类型" prop="insuranceType">
+                  <el-select v-model="personnelForm.insuranceType" placeholder="请选择参保类型" clearable
+                             :style="{width: '100%'}">
+                    <el-option v-for="(item, index) in insuranceTypeOptions" :key="index" :label="item.label"
+                               :value="item.value" :disabled="item.disabled"></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="政府补贴时间" prop="subsidyTime">
+                  <el-date-picker v-model="personnelForm.subsidyTime" format="yyyy-MM-dd"
+                                  value-format="yyyy-MM-dd" :style="{width: '100%'}" placeholder="请选择政府补贴时间" clearable>
+                  </el-date-picker>
+                </el-form-item>
+              </el-col>
+              <el-col :span="24">
+                <el-form-item label="备注" prop="field144">
+                  <el-input v-model="personnelForm.remake" type="textarea" placeholder="请输入备注"
+                            :autosize="{minRows: 4, maxRows: 4}" :style="{width: '100%'}"></el-input>
+                </el-form-item>
+              </el-col>
+            </el-form>
+          </el-row>
+          <div slot="footer">
+            <el-button @click="submitSaveFrom('personnelForm')">取消</el-button>
+            <el-button type="primary" @click="handelConfirm">确定</el-button>
+          </div>
+        </el-dialog>
       </div>
-    </el-dialog>
+    </template>
+
   </div>
 </template>
 
 <script>
 export default {
   name: "PersonnelManage",
-
+  inheritAttrs: false,
+  components: {},
+  props: [],
   data() {
     return {
       //搜索框表单
@@ -224,7 +367,131 @@ export default {
         villageName: ''
       },
       //新增村民对话框的表单
-      newPersonnelForm: {},
+      personnelForm: {
+        houseHoldName: undefined,
+        relation: undefined,
+        idCard: undefined,
+        name: "",
+        birthday: null,
+        age: 1,
+        gender: 2,
+        location: undefined,
+        weddingDate: null,
+        oldCultivatedArea: undefined,
+        curCultivatedArea: undefined,
+        curAveArea: undefined,
+        announcementDateAge: 1,
+        isProvincesPensionTreatment: 2,
+        insuranceType: 2,
+        subsidyTime: null,
+        remake: undefined,
+      },
+      //村人员数据验证
+      rules: {
+        houseHoldName: [{
+          required: true,
+          message: '请选择户主名',
+          trigger: 'change'
+        }],
+        relation: [{
+          required: true,
+          message: '请输入与户主关系',
+          trigger: 'blur'
+        }],
+        idCard: [{
+          required: true,
+          message: '请输入身份证号',
+          trigger: 'blur'
+        }],
+        name: [{
+          required: true,
+          message: '请输入姓名',
+          trigger: 'blur'
+        }],
+        birthday: [{
+          required: true,
+          message: '请选择出生日期',
+          trigger: 'change'
+        }],
+        age: [{
+          required: true,
+          message: '年龄',
+          trigger: 'blur'
+        }],
+        gender: [{
+          required: true,
+          message: '请选择性别',
+          trigger: 'change'
+        }],
+        location: [{
+          required: true,
+          message: '请输入村（社区）组',
+          trigger: 'blur'
+        }],
+        weddingDate: [{
+          required: true,
+          message: '请选择结婚日期',
+          trigger: 'change'
+        }],
+        oldCultivatedArea: [{
+          required: true,
+          message: '请输入原耕地面积',
+          trigger: 'blur'
+        }],
+        curCultivatedArea: [{
+          required: true,
+          message: '请输入现耕地面积',
+          trigger: 'blur'
+        }],
+        curAveArea: [{
+          required: true,
+          message: '请输入现平均耕地面积',
+          trigger: 'blur'
+        }],
+        announcementDateAge: [{
+          required: true,
+          message: '征地补偿公告日期时年龄',
+          trigger: 'blur'
+        }],
+        isProvincesPensionTreatment: [{
+          required: true,
+          message: '请选择是否已在省外领取养老待遇',
+          trigger: 'change'
+        }],
+        insuranceType: [{
+          required: true,
+          message: '请选择参保类型',
+          trigger: 'change'
+        }],
+        subsidyTime: [{
+          required: true,
+          message: '请选择政府补贴时间',
+          trigger: 'change'
+        }],
+        remake: [],
+      },
+      //复选框数据
+      genderOptions: [{
+        "label": "男",
+        "value": 1
+      }, {
+        "label": "女",
+        "value": 2
+      }],
+      isProvincesPensionTreatmentOptions: [{
+        "label": "是",
+        "value": 1
+      }, {
+        "label": "否",
+        "value": 2
+      }],
+      insuranceTypeOptions: [{
+        "label": "城居",
+        "value": 1
+      }, {
+        "label": "城职",
+        "value": 2
+      }],
       //村名校验
       newVillageRules: {
         villageName: [
@@ -298,18 +565,24 @@ export default {
     },
     //重置表单
     resetForm(formName) {
+      this.$refs[formName].resetFields();
       switch (formName) {
         case "newVillageForm" :
-          this.$refs[formName].resetFields();
           this.newVillageDialogVisible = false
           this.newVillageForm = {}
           break
-
+        case "personnelForm" :
+          this.newPersonnelDialogVisible = false
+          this.personnelForm = {}
+          break
       }
     },
     //关闭对话框
-    handleClose() {
-      this.resetForm('newVillageForm')
+    villageHandleClose() {
+      this.resetForm("newVillageForm")
+    },
+    personnelHandleClose() {
+      this.resetForm("personnelForm")
     },
     //提交村名更新或保存的表单
     submitSaveFrom(formName) {
@@ -369,6 +642,14 @@ export default {
         })
       })
     },
+    //村人员编辑框
+    editHandle(id) {
+      this.$axios.get("/personnel/info/" + id).then(res => {
+        this.personnelForm = res.data.data
+
+      })
+      this.newPersonnelDialogVisible = true
+    },
     //全选表格
     changeAllSelect(val) {
       const loop = (data) => {
@@ -427,11 +708,20 @@ export default {
       })
       this.checkedAll = flag
     },
-    //村人员编辑框
-    editHandle(id) {
-      this.newPersonnelDialogVisible = true
-
-    }
+    onOpen() {
+    },
+    onClose() {
+      this.$refs['personnelForm'].resetFields()
+    },
+    close() {
+      this.$emit('update:visible', false)
+    },
+    handelConfirm() {
+      this.$refs['personnelForm'].validate(valid => {
+        if (!valid) return
+        this.close()
+      })
+    },
   }
 }
 
