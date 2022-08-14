@@ -72,12 +72,15 @@
           row-key="id"
           border
           v-loading="loading"
+          :cell-style="cellStyle"
+          :row-class-name="tableRowClassName"
           class="tableBox"
           default-expand-all
           :tree-props="{children: 'children', hasChildren: 'hasChildren'}">
 
 
         <el-table-column width="75"
+
                          fixed>
           <template slot="header" slot-scope="scope">
             <el-checkbox v-model="checkedAll"
@@ -106,11 +109,26 @@
             prop="relation"
             label="与户主关系">
         </el-table-column>
+
+
         <el-table-column
             prop="idCard"
             width="200"
             label="身份证">
+          <template slot-scope="scope">
+            <el-popover trigger="hover"
+                        placement="top"
+                        popper-class="myPopper"
+                        v-if="scope.row.verifyIdcard!=null">
+              <p>{{ scope.row.verifyIdcard }}</p>
+              <div slot="reference" class="name-wrapper">
+                <span>{{ scope.row.idCard }}</span>
+              </div>
+            </el-popover>
+            <span v-else>{{ scope.row.idCard }}</span>
+          </template>
         </el-table-column>
+
         <el-table-column
             prop="birthday"
             label="出生日期">
@@ -131,7 +149,6 @@
             prop="isOffice"
             label="是否公职人员">
         </el-table-column>
-
         <el-table-column
             prop="icon"
             label="操作"
@@ -147,11 +164,9 @@
             </el-popconfirm>
           </template>
         </el-table-column>
-
         <template slot="empty">
           <el-empty description="暂无数据"></el-empty>
         </template>
-
       </el-table>
     </template>
     <!--分页插件-->
@@ -186,21 +201,6 @@
     </el-dialog>
 
     <!--村人员新增对话框-->
-    <!--    <el-dialog :title="`${personnelForm.id>0?'编辑':'新增'}`"-->
-    <!--               width="34%"-->
-    <!--               :before-close="personnelHandleClose"-->
-    <!--               :close-on-click-modal="false"-->
-    <!--               :visible.sync="newPersonnelDialogVisible">-->
-    <!--      <el-form :model="personnelForm"-->
-    <!--               ref="personnelForm"-->
-    <!--      >-->
-
-    <!--      </el-form>-->
-    <!--      <div slot="footer" class="dialog-footer">-->
-    <!--        <el-button type="primary" @click="submitSaveFrom('personnelForm')">确 定</el-button>-->
-    <!--        <el-button @click="resetForm('personnelForm')">重 置</el-button>-->
-    <!--      </div>-->
-    <!--    </el-dialog>-->
     <template>
       <div>
         <el-dialog v-bind="$attrs"
@@ -215,7 +215,7 @@
                      label-position="top">
               <el-col :span="12">
                 <el-form-item label="户主名" prop="houseHoldName">
-                  <el-select v-model="personnelForm.houseHoldName" placeholder="请选择户主名" clearable
+                  <el-select v-model="personnelForm.houseHoldName" filterable placeholder="请选择户主名" clearable
                              :style="{width: '100%'}"></el-select>
                 </el-form-item>
               </el-col>
@@ -514,6 +514,17 @@ export default {
   }, created() {
     this.getVillageList()
   }, methods: {
+    //高亮显示错误行
+    tableRowClassName({row, rowIndex}) {
+      if (row.verifyIdcard != null) {
+        return 'warning-row'
+      }
+    },
+    cellStyle({row, column, rowIndex, columnIndex}) {
+      if (column.label == "身份证" && row.verifyIdcard != null) {
+        return 'color:#F56C6C'
+      }
+    },
     //获取村子列表
     getVillageList() {
       this.$axios.get("/village/list").then(res => {
@@ -727,9 +738,18 @@ export default {
 
 </script>
 
-<style scoped>
+<style>
 .el-pagination {
   float: right;
   margin-top: 22px;
+}
+
+.el-table .warning-row {
+  background: oldlace;
+}
+
+.el-popper.myPopper {
+  background: #F2F6FC;
+  color: #F56C6C;
 }
 </style>
