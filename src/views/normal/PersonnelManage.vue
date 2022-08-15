@@ -38,7 +38,7 @@
                      size="small"></el-button>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" icon="el-icon-edit" circle @click="editVillage(selectValue)"
+          <el-button type="primary" icon="el-icon-edit" circle @click="editVillageHandle(selectValue)"
                      size="small"></el-button>
         </el-form-item>
         <el-form-item>
@@ -156,7 +156,7 @@
           <template slot-scope="scope">
             <el-button
                 size="mini"
-                @click="editHandle(scope.row.id)">编辑
+                @click="editPersonnelHandle(scope.row)">编辑
             </el-button>
             <el-divider direction="vertical"></el-divider>
             <el-popconfirm title="这一段内容确定删除吗？" @confirm="delHandle(scope.row.id)">
@@ -214,20 +214,25 @@
             <el-form ref="personnelForm" :model="personnelForm" :rules="rules" size="small" label-width="100px"
                      label-position="top">
               <el-col :span="12">
-                <el-form-item label="户主名" prop="houseHoldName">
-                  <el-select v-model="personnelForm.houseHoldName" filterable placeholder="请选择户主名" clearable
-                             :style="{width: '100%'}"></el-select>
+                <el-form-item label="户主名" prop="houseHoldId">
+                  <el-select v-model="personnelForm.houseHoldId"
+                             filterable
+                             placeholder="请选择户主名"
+                             @change="houseHoldNameSelectChange"
+                             clearable
+                             :style="{width: '100%'}">
+                    <el-option
+                        v-for="item in households"
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item.id">
+                    </el-option>
+                  </el-select>
                 </el-form-item>
               </el-col>
               <el-col :span="12">
                 <el-form-item label="与户主关系" prop="relation">
                   <el-input v-model="personnelForm.relation" placeholder="请输入与户主关系" clearable
-                            :style="{width: '100%'}"></el-input>
-                </el-form-item>
-              </el-col>
-              <el-col :span="12">
-                <el-form-item label="身份证号" prop="idCard">
-                  <el-input v-model="personnelForm.idCard" placeholder="请输入身份证号" clearable
                             :style="{width: '100%'}"></el-input>
                 </el-form-item>
               </el-col>
@@ -238,11 +243,19 @@
                 </el-form-item>
               </el-col>
               <el-col :span="12">
+                <el-form-item label="身份证号" prop="idCard">
+                  <el-input v-model="personnelForm.idCard" placeholder="请输入身份证号" clearable
+                            :style="{width: '100%'}"></el-input>
+                </el-form-item>
+              </el-col>
+
+              <el-col :span="12">
                 <el-form-item label="出生日期" prop="birthday">
                   <el-date-picker v-model="personnelForm.birthday" format="yyyy-MM-dd" value-format="yyyy-MM-dd"
                                   :style="{width: '100%'}" placeholder="请选择出生日期" clearable></el-date-picker>
                 </el-form-item>
               </el-col>
+
               <el-col :span="12">
                 <el-form-item label="年龄" prop="age">
                   <el-input-number v-model="personnelForm.age" placeholder="年龄" :step='1'></el-input-number>
@@ -368,7 +381,7 @@ export default {
       },
       //新增村民对话框的表单
       personnelForm: {
-        houseHoldName: undefined,
+        houseHoldId: undefined,
         relation: undefined,
         idCard: undefined,
         name: "",
@@ -388,7 +401,7 @@ export default {
       },
       //村人员数据验证
       rules: {
-        houseHoldName: [{
+        houseHoldId: [{
           required: true,
           message: '请选择户主名',
           trigger: 'change'
@@ -498,13 +511,15 @@ export default {
           {required: true, message: '请输入村名', trigger: 'blur'}
         ]
       },
-
       formLabelWidth: '120px',
       villageList: [],
+
       selectValue: '',
       checkedAll: false,
       elTableHeight: 0,
-      loading: false
+      loading: false,
+      //当前村子的所有户主
+      households: [],
     }
   },
   mounted() {
@@ -551,7 +566,7 @@ export default {
       })
     },
     //村名编辑框
-    editVillage(id) {
+    editVillageHandle(id) {
       this.$axios.get("/village/info/" + id).then(res => {
         this.newVillageForm = res.data.data;
         this.newVillageDialogVisible = true;
@@ -560,6 +575,10 @@ export default {
     //村子下拉框改变调用
     selectChange(val) {
       this.getPersonnelList(val)
+    },
+    //户主名下拉框改变调用
+    houseHoldNameSelectChange(val) {
+      this.personnelForm.houseHoldId = val
     },
     //显示页码
     handleSizeChange(val) {
@@ -646,7 +665,6 @@ export default {
           message: '恭喜你，操作成功',
           type: 'success',
           onClose: () => {
-
             this.getPersonnelList(this.selectValue)
             this.loading = false
           }
@@ -654,10 +672,14 @@ export default {
       })
     },
     //村人员编辑框
-    editHandle(id) {
-      this.$axios.get("/personnel/info/" + id).then(res => {
+    editPersonnelHandle(row) {
+      this.$axios.get("/personnel/info/" + row.id).then(res => {
         this.personnelForm = res.data.data
-
+      })
+      console.log(this.selectValue)
+      this.$axios.get("/personnel/getHouseholds/" + this.selectValue).then(res => {
+        this.households = res.data.data
+        this.personnelForm.houseHoldId = row.householdId
       })
       this.newPersonnelDialogVisible = true
     },
@@ -683,7 +705,6 @@ export default {
           ss.checked = val.checked
         })
       } else {
-        console.log("运行了" + val.householdId)
         let checkedLeg = 0
 
         this.tableData.some(item => {
