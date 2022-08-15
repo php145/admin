@@ -150,6 +150,10 @@
             label="是否公职人员">
         </el-table-column>
         <el-table-column
+            prop="remake"
+            label="备注">
+        </el-table-column>
+        <el-table-column
             prop="icon"
             label="操作"
             width="180">
