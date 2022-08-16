@@ -163,7 +163,7 @@
                 @click="editPersonnelHandle(scope.row)">编辑
             </el-button>
             <el-divider direction="vertical"></el-divider>
-            <el-popconfirm title="这一段内容确定删除吗？" @confirm="delHandle(scope.row.id)">
+            <el-popconfirm title="这一段内容确定删除吗？" @confirm="delRowHandle(scope.row.id)">
               <el-button type="danger" size="mini" slot="reference">删除</el-button>
             </el-popconfirm>
           </template>
@@ -758,6 +758,10 @@ export default {
         this.close()
       })
     },
+    //删除表格内一行
+    delRowHandle(id) {
+
+    }
   }
 }
 

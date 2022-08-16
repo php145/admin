@@ -307,7 +307,6 @@ export default {
           ids.push(row.id)
         })
       }
-
       console.log(ids)
 
       this.$axios.post("/sys/role/delete", ids).then(() => {
