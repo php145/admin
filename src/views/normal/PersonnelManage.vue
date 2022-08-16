@@ -18,7 +18,7 @@
         <el-button type="primary" @click="newPersonnelDialogVisible = true" size="small">新增</el-button>
       </el-form-item>
       <el-form-item>
-        <el-popconfirm title="确定批量删除吗？" @confirm="delHandle(null)">
+        <el-popconfirm title="确定批量删除吗？" @confirm="delRowHandle(null)">
           <el-button type="danger" slot="reference" :disabled="delBtlStatu" size="small">批量删除</el-button>
         </el-popconfirm>
       </el-form-item>
@@ -84,6 +84,7 @@
                          fixed>
           <template slot="header" slot-scope="scope">
             <el-checkbox v-model="checkedAll"
+                         :indeterminate="selectAllIndeterminate"
                          @change="changeAllSelect"/>
           </template>
           <template slot-scope="scope">
@@ -366,7 +367,7 @@ export default {
       //搜索框表单
       searchForm: {},
       //批量删除按钮状态
-      delBtlStatu: true,
+      delBtlStatu: false,
       //分页参数
       indent: 16,
       total: 0,
@@ -515,6 +516,8 @@ export default {
           {required: true, message: '请输入村名', trigger: 'blur'}
         ]
       },
+      //全选框的半选中状态
+      selectAllIndeterminate: false,
       formLabelWidth: '120px',
       villageList: [],
 
@@ -675,6 +678,37 @@ export default {
         })
       })
     },
+    //删除表格内一行
+    delRowHandle(id) {
+      let ids = []
+
+      if (id) {
+        ids.push(id)
+      } else {
+        this.tableData.forEach(row => {
+          if (row.checked) {
+            ids.push(row.id)
+          }
+          row.children.forEach(children => {
+            if (children.checked) {
+              ids.push(children.id)
+            }
+          })
+        })
+      }
+      this.loading = true
+      this.$axios.post("/personnel/delete/", ids).then(res => {
+        this.$message({
+          showClose: true,
+          message: '恭喜你，操作成功',
+          type: 'success',
+          onClose: () => {
+            this.getPersonnelList()
+            this.loading = false
+          }
+        });
+      })
+    },
     //村人员编辑框
     editPersonnelHandle(row) {
       this.$axios.get("/personnel/info/" + row.id).then(res => {
@@ -689,6 +723,7 @@ export default {
     },
     //全选表格
     changeAllSelect(val) {
+      this.selectAllIndeterminate = false;
       const loop = (data) => {
         data.forEach(item => {
           item.checked = val
@@ -704,6 +739,7 @@ export default {
     },
     //选择表格单行数据
     changeRowSelect(val) {
+
       if (val.children != null && val.children.length > 0) {
         val.children.forEach(ss => {
           ss.checked = val.checked
@@ -732,7 +768,6 @@ export default {
             return
           }
         })
-        // console.log(this.tableData2)
       }
       // 判断是否全部选择了,改变全选框的样式
       let flag = true
@@ -742,9 +777,22 @@ export default {
           return
         }
       })
+      this.selectAllIndeterminate = false;
       this.checkedAll = flag
+      //判断是否有选择
+      if (!flag) {
+        let indeterminate = false
+        this.tableData.some(item => {
+          if (item.checked) {
+            indeterminate = true
+            return
+          }
+        })
+        this.selectAllIndeterminate = indeterminate
+      }
     },
     onOpen() {
+
     },
     onClose() {
       this.$refs['personnelForm'].resetFields()
@@ -758,10 +806,7 @@ export default {
         this.close()
       })
     },
-    //删除表格内一行
-    delRowHandle(id) {
 
-    }
   }
 }
 
