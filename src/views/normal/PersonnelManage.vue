@@ -80,11 +80,12 @@
 
 
         <el-table-column width="75"
-
+                         align="center"
                          fixed>
           <template slot="header" slot-scope="scope">
             <el-checkbox v-model="checkedAll"
                          :indeterminate="selectAllIndeterminate"
+
                          @change="changeAllSelect"/>
           </template>
           <template slot-scope="scope">
@@ -104,6 +105,7 @@
 
         <el-table-column
             prop="name"
+            width="90"
             label="姓名">
         </el-table-column>
         <el-table-column
@@ -114,7 +116,7 @@
 
         <el-table-column
             prop="idCard"
-            width="200"
+            width="190"
             label="身份证">
           <template slot-scope="scope">
             <el-popover trigger="hover"
@@ -697,13 +699,14 @@ export default {
         })
       }
       this.loading = true
+      console.log(ids)
       this.$axios.post("/personnel/delete/", ids).then(res => {
         this.$message({
           showClose: true,
           message: '恭喜你，操作成功',
           type: 'success',
           onClose: () => {
-            this.getPersonnelList()
+            this.getPersonnelList(this.selectValue)
             this.loading = false
           }
         });
@@ -772,6 +775,7 @@ export default {
       // 判断是否全部选择了,改变全选框的样式
       let flag = true
       this.tableData.some(item => {
+
         if (!item.checked) {
           flag = false
           return
@@ -783,6 +787,11 @@ export default {
       if (!flag) {
         let indeterminate = false
         this.tableData.some(item => {
+          var checkedLeg = item.children.filter(ss => ss.checked).length
+          if (checkedLeg > 0) {
+            indeterminate = true
+            return
+          }
           if (item.checked) {
             indeterminate = true
             return
