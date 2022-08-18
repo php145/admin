@@ -708,6 +708,7 @@ export default {
           onClose: () => {
             this.getPersonnelList(this.selectValue)
             this.loading = false
+            this.checkedAll = false;
           }
         });
       })
