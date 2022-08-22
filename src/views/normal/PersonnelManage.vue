@@ -138,6 +138,7 @@
         </el-table-column>
         <el-table-column
             prop="gender"
+            width="50"
             label="性别">
         </el-table-column>
         <el-table-column
@@ -150,11 +151,17 @@
         </el-table-column>
         <el-table-column
             prop="isOffice"
+            width="110"
             label="是否公职人员">
         </el-table-column>
         <el-table-column
             prop="remake"
             label="备注">
+        </el-table-column>
+        <el-table-column
+            prop="insuranceType"
+            label="参保类型"
+        >
         </el-table-column>
         <el-table-column
             prop="icon"
@@ -202,7 +209,7 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitSaveFrom('newVillageForm')">确 定</el-button>
+        <el-button type="primary" @click="submitSaveVillageFrom('newVillageForm')">确 定</el-button>
         <el-button @click="resetForm('newVillageForm')">重 置</el-button>
       </div>
     </el-dialog>
@@ -220,6 +227,40 @@
           <el-row :gutter="15">
             <el-form ref="personnelForm" :model="personnelForm" :rules="rules" size="small" label-width="100px"
                      label-position="top">
+
+              <el-col :span="12">
+                <el-form-item label="姓名" prop="name">
+                  <el-input v-model="personnelForm.name" placeholder="请输入姓名" clearable :style="{width: '100%'}">
+                  </el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="身份证号" prop="idCard">
+                  <el-input v-model="personnelForm.idCard" placeholder="请输入身份证号" clearable
+                            :style="{width: '100%'}" :blur="idCardInputHandle"></el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="出生日期" prop="birthday">
+                  <el-date-picker v-model="personnelForm.birthday" format="yyyy-MM-dd" value-format="yyyy-MM-dd"
+                                  :style="{width: '100%'}" placeholder="请选择出生日期" clearable></el-date-picker>
+                </el-form-item>
+              </el-col>
+
+              <el-col :span="12">
+                <el-form-item label="年龄" prop="age">
+                  <el-input-number v-model="personnelForm.age" placeholder="年龄" :step='1'></el-input-number>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="性别" prop="gender">
+                  <el-select v-model="personnelForm.gender" placeholder="请选择性别" clearable
+                             :style="{width: '100%'}">
+                    <el-option v-for="(item, index) in genderOptions" :key="index" :label="item.label"
+                               :value="item.value" :disabled="item.disabled"></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-col>
               <el-col :span="12">
                 <el-form-item label="户主名" prop="houseHoldId">
                   <el-select v-model="personnelForm.houseHoldId"
@@ -243,40 +284,8 @@
                             :style="{width: '100%'}"></el-input>
                 </el-form-item>
               </el-col>
-              <el-col :span="12">
-                <el-form-item label="姓名" prop="name">
-                  <el-input v-model="personnelForm.name" placeholder="请输入姓名" clearable :style="{width: '100%'}">
-                  </el-input>
-                </el-form-item>
-              </el-col>
-              <el-col :span="12">
-                <el-form-item label="身份证号" prop="idCard">
-                  <el-input v-model="personnelForm.idCard" placeholder="请输入身份证号" clearable
-                            :style="{width: '100%'}"></el-input>
-                </el-form-item>
-              </el-col>
 
-              <el-col :span="12">
-                <el-form-item label="出生日期" prop="birthday">
-                  <el-date-picker v-model="personnelForm.birthday" format="yyyy-MM-dd" value-format="yyyy-MM-dd"
-                                  :style="{width: '100%'}" placeholder="请选择出生日期" clearable></el-date-picker>
-                </el-form-item>
-              </el-col>
 
-              <el-col :span="12">
-                <el-form-item label="年龄" prop="age">
-                  <el-input-number v-model="personnelForm.age" placeholder="年龄" :step='1'></el-input-number>
-                </el-form-item>
-              </el-col>
-              <el-col :span="12">
-                <el-form-item label="性别" prop="gender">
-                  <el-select v-model="personnelForm.gender" placeholder="请选择性别" clearable
-                             :style="{width: '100%'}">
-                    <el-option v-for="(item, index) in genderOptions" :key="index" :label="item.label"
-                               :value="item.value" :disabled="item.disabled"></el-option>
-                  </el-select>
-                </el-form-item>
-              </el-col>
               <el-col :span="12">
                 <el-form-item label="村（社区）组" prop="location">
                   <el-input v-model="personnelForm.location" placeholder="请输入村（社区）组" clearable
@@ -393,16 +402,16 @@ export default {
         idCard: undefined,
         name: "",
         birthday: null,
-        age: 1,
-        gender: 2,
+        age: undefined,
+        gender: undefined,
         location: undefined,
         weddingDate: null,
         oldCultivatedArea: undefined,
         curCultivatedArea: undefined,
         curAveArea: undefined,
-        announcementDateAge: 1,
-        isProvincesPensionTreatment: 2,
-        insuranceType: 2,
+        announcementDateAge: undefined,
+        isProvincesPensionTreatment: undefined,
+        insuranceType: undefined,
         subsidyTime: null,
         remake: undefined,
       },
@@ -448,46 +457,8 @@ export default {
           message: '请输入村（社区）组',
           trigger: 'blur'
         }],
-        weddingDate: [{
-          required: true,
-          message: '请选择结婚日期',
-          trigger: 'change'
-        }],
-        oldCultivatedArea: [{
-          required: true,
-          message: '请输入原耕地面积',
-          trigger: 'blur'
-        }],
-        curCultivatedArea: [{
-          required: true,
-          message: '请输入现耕地面积',
-          trigger: 'blur'
-        }],
-        curAveArea: [{
-          required: true,
-          message: '请输入现平均耕地面积',
-          trigger: 'blur'
-        }],
-        announcementDateAge: [{
-          required: true,
-          message: '征地补偿公告日期时年龄',
-          trigger: 'blur'
-        }],
-        isProvincesPensionTreatment: [{
-          required: true,
-          message: '请选择是否已在省外领取养老待遇',
-          trigger: 'change'
-        }],
-        insuranceType: [{
-          required: true,
-          message: '请选择参保类型',
-          trigger: 'change'
-        }],
-        subsidyTime: [{
-          required: true,
-          message: '请选择政府补贴时间',
-          trigger: 'change'
-        }],
+        insuranceType: [],
+        subsidyTime: [],
         remake: [],
       },
       //复选框数据
@@ -624,7 +595,7 @@ export default {
       this.resetForm("personnelForm")
     },
     //提交村名更新或保存的表单
-    submitSaveFrom(formName) {
+    submitSaveVillageFrom(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
           this.$axios.post(
@@ -743,7 +714,6 @@ export default {
     },
     //选择表格单行数据
     changeRowSelect(val) {
-
       if (val.children != null && val.children.length > 0) {
         val.children.forEach(ss => {
           ss.checked = val.checked
@@ -776,7 +746,6 @@ export default {
       // 判断是否全部选择了,改变全选框的样式
       let flag = true
       this.tableData.some(item => {
-
         if (!item.checked) {
           flag = false
           return
@@ -801,9 +770,7 @@ export default {
         this.selectAllIndeterminate = indeterminate
       }
     },
-    onOpen() {
-
-    },
+    //新增/编辑的对话框表单的事件
     onClose() {
       this.$refs['personnelForm'].resetFields()
     },
@@ -815,8 +782,9 @@ export default {
         if (!valid) return
         this.close()
       })
-    },
+    }, idCardInputHandle() {
 
+    }
   }
 }
 
