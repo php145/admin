@@ -283,8 +283,6 @@
                             :style="{width: '100%'}"></el-input>
                 </el-form-item>
               </el-col>
-
-
               <el-col :span="12">
                 <el-form-item label="村（社区）组" prop="location">
                   <el-input v-model="personnelForm.location" placeholder="请输入村（社区）组" clearable
@@ -356,8 +354,8 @@
             </el-form>
           </el-row>
           <div slot="footer">
-            <el-button @click="submitSaveFrom('personnelForm')">取消</el-button>
-            <el-button type="primary" @click="handelConfirm">确定</el-button>
+            <el-button @click="submitSavePersonnelForm()">确定</el-button>
+            <el-button type="primary" @click="resetForm('personnelForm')">重置</el-button>
           </div>
         </el-dialog>
       </div>
@@ -661,8 +659,8 @@ export default {
           message: '恭喜你，操作成功',
           type: 'success',
           onClose: () => {
-            this.getPersonnelList(this.selectValue)
             this.loading = false
+            this.getPersonnelList(this.selectValue)
           }
         })
       })
@@ -685,7 +683,6 @@ export default {
           })
         })
       }
-      this.loading = true
       console.log(ids)
       this.$axios.post("/personnel/delete/", ids).then(res => {
         this.$message({
@@ -694,7 +691,6 @@ export default {
           type: 'success',
           onClose: () => {
             this.getPersonnelList(this.selectValue)
-            this.loading = false
             this.checkedAll = false;
           }
         });
@@ -825,19 +821,11 @@ export default {
         this.selectAllIndeterminate = indeterminate
       }
     },
-    //新增/编辑的对话框表单的事件
-    onClose() {
-      this.$refs['personnelForm'].resetFields()
-    },
-    close() {
-      this.$emit('update:visible', false)
-    },
-    handelConfirm() {
-      this.$refs['personnelForm'].validate(valid => {
-        if (!valid) return
-        this.close()
-      })
-    },
+    //新增数据保存到数据库
+    submitSavePersonnelForm() {
+
+    }
+
   }
 }
 
