@@ -15,7 +15,7 @@
       </el-form-item>
 
       <el-form-item>
-        <el-button type="primary" @click="newPersonnelDialogVisible = true" size="small">新增</el-button>
+        <el-button type="primary" @click="newPersonnelBtn()" size="small">新增</el-button>
       </el-form-item>
       <el-form-item>
         <el-popconfirm title="确定批量删除吗？" @confirm="delRowHandle(null)">
@@ -154,14 +154,15 @@
             width="110"
             label="是否公职人员">
         </el-table-column>
-        <el-table-column
-            prop="remake"
-            label="备注">
-        </el-table-column>
+
         <el-table-column
             prop="insuranceType"
             label="参保类型"
         >
+        </el-table-column>
+        <el-table-column
+            prop="remake"
+            label="备注">
         </el-table-column>
         <el-table-column
             prop="icon"
@@ -219,10 +220,8 @@
       <div>
         <el-dialog v-bind="$attrs"
                    v-on="$listeners"
-                   @open="onOpen"
                    :before-close="personnelHandleClose"
                    :visible.sync="newPersonnelDialogVisible"
-                   @close="onClose"
                    :title="`${personnelForm.id>0?'编辑':'新增'}`">
           <el-row :gutter="15">
             <el-form ref="personnelForm" :model="personnelForm" :rules="rules" size="small" label-width="100px"
@@ -237,7 +236,7 @@
               <el-col :span="12">
                 <el-form-item label="身份证号" prop="idCard">
                   <el-input v-model="personnelForm.idCard" placeholder="请输入身份证号" clearable
-                            :style="{width: '100%'}" :blur="idCardInputHandle"></el-input>
+                            :style="{width: '100%'}" @blur="newPersonnelIdcard($event)" autocomplete></el-input>
                 </el-form-item>
               </el-col>
               <el-col :span="12">
@@ -265,7 +264,7 @@
                 <el-form-item label="户主名" prop="houseHoldId">
                   <el-select v-model="personnelForm.houseHoldId"
                              filterable
-                             placeholder="请选择户主名"
+                             placeholder="请选择户主名，户主请设置为空"
                              @change="houseHoldNameSelectChange"
                              clearable
                              :style="{width: '100%'}">
@@ -417,21 +416,38 @@ export default {
       },
       //村人员数据验证
       rules: {
-        houseHoldId: [{
-          required: true,
-          message: '请选择户主名',
-          trigger: 'change'
-        }],
+        houseHoldId: [],
         relation: [{
           required: true,
           message: '请输入与户主关系',
           trigger: 'blur'
         }],
-        idCard: [{
-          required: true,
-          message: '请输入身份证号',
-          trigger: 'blur'
-        }],
+        idCard: [
+          {
+            required: true,
+            message: '请输入身份证号',
+            trigger: 'blur',
+          }, {
+            validator: function (rule, value, callback) {
+
+              if (value.length > 18) {
+                callback(new Error("身份证号码长度大于18位"));
+              } else if (value.length < 18 && value.length > 15) {
+                callback(new Error("身份证号码小于18位"))
+              } else if (value.length < 15) {
+                callback(new Error("身份证号码小于15位"))
+              }
+            }
+          }, {
+            validator: function (rule, value, callback) {
+              var pattern18 = /([1-6][1-9]|50)\d{4}(18|19|20)\d{2}((0[1-9])|10|11|12)(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]/
+              var pattern15 = /([1-6][1-9]|50)\d{4}\d{2}((0[1-9])|10|11|12)(([0-2][1-9])|10|20|30|31)\d{3}/
+              if (pattern15.test(value) && pattern18.test(value)) {
+                callback(new Error("无效的身份证号码"))
+              }
+            }
+          }
+        ],
         name: [{
           required: true,
           message: '请输入姓名',
@@ -689,12 +705,51 @@ export default {
       this.$axios.get("/personnel/info/" + row.id).then(res => {
         this.personnelForm = res.data.data
       })
-      console.log(this.selectValue)
       this.$axios.get("/personnel/getHouseholds/" + this.selectValue).then(res => {
         this.households = res.data.data
         this.personnelForm.houseHoldId = row.householdId
       })
       this.newPersonnelDialogVisible = true
+    },
+    //新增村民按钮点击事件
+    newPersonnelBtn() {
+      this.newPersonnelDialogVisible = true
+      this.$axios.get("/personnel/getHouseholds/" + this.selectValue).then(res => {
+        this.households = res.data.data
+      })
+    },
+    //新增对话框身份证输入框的事件
+    newPersonnelIdcard(e) {
+      let id = e.target.value
+      let year
+      let month
+      let day
+      let sc
+      if (id != null && id.length != 0) {
+        if (id.length > 15) {
+          year = id.substring(6, 10);
+          month = id.substring(10, 12);
+          day = id.substring(12, 14);
+          sc = id.substring(14, 17)
+        } else {
+          year = "19" + id.substring(6, 8);
+          month = id.substring(8, 10);
+          day = id.substring(10, 12);
+          sc = id.substring(12, 15)
+        }
+        console.log(year + "-" + month + "-" + day)
+        let d = new Date()
+        let d1 = new Date(year + "-" + month + "-" + day)
+        let currTime = d.getTime()
+        let oldTime = d1.getTime()
+        let timeMillis = currTime - oldTime
+        this.personnelForm.birthday = year + "-" + month + "-" + day
+        this.personnelForm.age = parseInt(timeMillis * 3.16887385E-11)
+        this.personnelForm.gender = (sc % 2 == 0 ? "女" : "男")
+      } else {
+        this.personnelForm.birthday = null
+        this.personnelForm.age = null
+      }
     },
     //全选表格
     changeAllSelect(val) {
@@ -782,9 +837,7 @@ export default {
         if (!valid) return
         this.close()
       })
-    }, idCardInputHandle() {
-
-    }
+    },
   }
 }
 
