@@ -218,13 +218,15 @@
     <!--村人员新增对话框-->
     <template>
       <div>
-        <el-dialog v-bind="$attrs"
-                   v-on="$listeners"
-                   :before-close="personnelHandleClose"
+        <el-dialog :before-close="personnelHandleClose"
                    :visible.sync="newPersonnelDialogVisible"
                    :title="`${personnelForm.id>0?'编辑':'新增'}`">
           <el-row :gutter="15">
-            <el-form ref="personnelForm" :model="personnelForm" :rules="rules" size="small" label-width="100px"
+            <el-form ref="personnelForm"
+                     :model="personnelForm"
+                     :rules="personnelRules"
+                     size="small"
+                     label-width="100px"
                      label-position="top">
 
               <el-col :span="12">
@@ -279,8 +281,14 @@
               </el-col>
               <el-col :span="12">
                 <el-form-item label="与户主关系" prop="relation">
-                  <el-input v-model="personnelForm.relation" placeholder="请输入与户主关系" clearable
-                            :style="{width: '100%'}"></el-input>
+                  <el-autocomplete
+                      v-model="personnelForm.relation"
+                      placeholder="请输入与户主关系"
+                      clearable
+                      :fetch-suggestions="querySearch"
+                      @select="handleSelect"
+                      class="inline-input"
+                      :style="{width: '100%'}"></el-autocomplete>
                 </el-form-item>
               </el-col>
               <el-col :span="12">
@@ -354,8 +362,8 @@
             </el-form>
           </el-row>
           <div slot="footer">
-            <el-button @click="submitSavePersonnelForm()">确定</el-button>
-            <el-button type="primary" @click="resetForm('personnelForm')">重置</el-button>
+            <el-button type="primary" @click="submitSavePersonnelForm('personnelForm')">确定</el-button>
+            <el-button @click="resetForm('personnelForm')">重置</el-button>
           </div>
         </el-dialog>
       </div>
@@ -413,7 +421,7 @@ export default {
         remake: undefined,
       },
       //村人员数据验证
-      rules: {
+      personnelRules: {
         houseHoldId: [],
         relation: [{
           required: true,
@@ -434,13 +442,18 @@ export default {
                 callback(new Error("身份证号码小于18位"))
               } else if (value.length < 15) {
                 callback(new Error("身份证号码小于15位"))
+              } else {
+                callback()
               }
             }
           }, {
             validator: function (rule, value, callback) {
-              var pattern18 = /([1-6][1-9]|50)\d{4}(18|19|20)\d{2}((0[1-9])|10|11|12)(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]/
-              var pattern15 = /([1-6][1-9]|50)\d{4}\d{2}((0[1-9])|10|11|12)(([0-2][1-9])|10|20|30|31)\d{3}/
-              if (pattern15.test(value) && pattern18.test(value)) {
+
+              let pattern18 = /([1-6][1-9]|50)\d{4}(18|19|20)\d{2}((0[1-9])|10|11|12)(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]/
+              let pattern15 = /([1-6][1-9]|50)\d{4}\d{2}((0[1-9])|10|11|12)(([0-2][1-9])|10|20|30|31)\d{3}/
+              if (pattern15.test(value) || pattern18.test(value)) {
+                callback()
+              } else {
                 callback(new Error("无效的身份证号码"))
               }
             }
@@ -612,6 +625,7 @@ export default {
     submitSaveVillageFrom(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
+          console.log(11)
           this.$axios.post(
               '/village/' + (this.newVillageForm.id ? 'update' : 'save'), this.newVillageForm)
               .then(() => {
@@ -822,10 +836,32 @@ export default {
       }
     },
     //新增数据保存到数据库
-    submitSavePersonnelForm() {
+    submitSavePersonnelForm(formName) {
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          this.$axios.post('/personnel/' + (this.personnelForm.id ? 'update' : 'save'), this.personnelForm)
+              .then(() => {
+                this.$message({
+                  showClose: true,
+                  message: '恭喜你，操作成功',
+                  type: 'success',
+                  onClose: () => {
+                    this.getPersonnelList()
+                  }
+                })
+                this.newPersonnelDialogVisible = false
+                this.resetForm(formName)
+              })
+        } else {
+          console.log('error submit!!');
+          return false;
+        }
+      })
+    },
+    //加载和户主关系的选项
+    loadRelationItem() {
 
     }
-
   }
 }
 
