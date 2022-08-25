@@ -3,7 +3,7 @@
 
     <el-form :inline="true">
       <el-form-item>
-        <el-button type="primary" @click="dialogVisible = true">新增</el-button>
+        <el-button type="primary" @click="dialogVisible = true" size="small">新增</el-button>
       </el-form-item>
     </el-form>
 

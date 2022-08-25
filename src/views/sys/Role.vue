@@ -6,20 +6,21 @@
             v-model="searchForm.name"
             placeholder="名称"
             clearable
+            size="small"
         >
         </el-input>
       </el-form-item>
 
       <el-form-item>
-        <el-button @click="getRoleList">搜索</el-button>
+        <el-button @click="getRoleList" size="small">搜索</el-button>
       </el-form-item>
 
       <el-form-item>
-        <el-button type="primary" @click="dialogVisible = true">新增</el-button>
+        <el-button type="primary" @click="dialogVisible = true" size="small">新增</el-button>
       </el-form-item>
       <el-form-item>
         <el-popconfirm title="确定批量删除吗？" @confirm="delHandle(null)">
-          <el-button type="danger" slot="reference" :disabled="delBtlStatu">批量删除</el-button>
+          <el-button type="danger" slot="reference" :disabled="delBtlStatu" size="small">批量删除</el-button>
         </el-popconfirm>
       </el-form-item>
     </el-form>

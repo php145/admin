@@ -78,14 +78,12 @@
           default-expand-all
           :tree-props="{children: 'children', hasChildren: 'hasChildren'}">
 
-
         <el-table-column width="75"
                          align="center"
                          fixed>
           <template slot="header" slot-scope="scope">
             <el-checkbox v-model="checkedAll"
                          :indeterminate="selectAllIndeterminate"
-
                          @change="changeAllSelect"/>
           </template>
           <template slot-scope="scope">
@@ -285,7 +283,7 @@
                       v-model="personnelForm.relation"
                       placeholder="请输入与户主关系"
                       clearable
-                      :fetch-suggestions="querySearch"
+                      :fetch-suggestions="inputQuerySearch"
                       @select="handleSelect"
                       class="inline-input"
                       :style="{width: '100%'}"></el-autocomplete>
@@ -383,7 +381,7 @@ export default {
       //搜索框表单
       searchForm: {},
       //批量删除按钮状态
-      delBtlStatu: false,
+      delBtlStatu: true,
       //分页参数
       indent: 16,
       total: 0,
@@ -527,12 +525,15 @@ export default {
       loading: false,
       //当前村子的所有户主
       households: [],
+      //与户主关系的所有项目
+      relationItems: [],
     }
   },
   mounted() {
     this.$nextTick(() => {
       this.elTableHeight = window.innerHeight - 250
     })
+    this.loadRelationItem()
   }, created() {
     this.getVillageList()
   }, methods: {
@@ -625,7 +626,6 @@ export default {
     submitSaveVillageFrom(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          console.log(11)
           this.$axios.post(
               '/village/' + (this.newVillageForm.id ? 'update' : 'save'), this.newVillageForm)
               .then(() => {
@@ -634,7 +634,7 @@ export default {
                   message: '恭喜你，操作成功',
                   type: 'success',
                   onClose: () => {
-                    this.getVillageList()
+                    this.getPersonnelList(this.selectValue)
                   }
                 });
                 this.newVillageDialogVisible = false
@@ -715,18 +715,24 @@ export default {
       this.$axios.get("/personnel/info/" + row.id).then(res => {
         this.personnelForm = res.data.data
       })
-      this.$axios.get("/personnel/getHouseholds/" + this.selectValue).then(res => {
-        this.households = res.data.data
-        this.personnelForm.houseHoldId = row.householdId
-      })
+      if (this.selectValue != null && this.selectValue != "") {
+        this.$axios.get("/personnel/getHouseholds/" + this.selectValue).then(res => {
+          this.households = res.data.data
+          this.personnelForm.houseHoldId = row.householdId
+        })
+      }
       this.newPersonnelDialogVisible = true
     },
     //新增村民按钮点击事件
     newPersonnelBtn() {
-      this.newPersonnelDialogVisible = true
-      this.$axios.get("/personnel/getHouseholds/" + this.selectValue).then(res => {
-        this.households = res.data.data
-      })
+      if (this.selectValue != null && this.selectValue != "") {
+        this.newPersonnelDialogVisible = true
+        this.$axios.get("/personnel/getHouseholds/" + this.selectValue).then(res => {
+          this.households = res.data.data
+        })
+      } else {
+        this.$message.error("请先添加村子")
+      }
     },
     //新增对话框身份证输入框的事件
     newPersonnelIdcard(e) {
@@ -763,6 +769,7 @@ export default {
     },
     //全选表格
     changeAllSelect(val) {
+      this.delBtlStatu = !val
       this.selectAllIndeterminate = false;
       const loop = (data) => {
         data.forEach(item => {
@@ -779,6 +786,7 @@ export default {
     },
     //选择表格单行数据
     changeRowSelect(val) {
+      this.delBtlStatu = true
       if (val.children != null && val.children.length > 0) {
         val.children.forEach(ss => {
           ss.checked = val.checked
@@ -825,10 +833,12 @@ export default {
           var checkedLeg = item.children.filter(ss => ss.checked).length
           if (checkedLeg > 0) {
             indeterminate = true
+            this.delBtlStatu = false
             return
           }
           if (item.checked) {
             indeterminate = true
+            this.delBtlStatu = false
             return
           }
         })
@@ -860,7 +870,18 @@ export default {
     },
     //加载和户主关系的选项
     loadRelationItem() {
-
+      this.$axios.get("/personnel/getRelationItems/").then(res => {
+        this.relationItems = res.data.data
+        console.log(this.relationItems)
+      })
+    },
+    //设置输入框的搜索项
+    inputQuerySearch(queryString, cb) {
+      let relationItems = this.relationItems
+      let results = queryString ? relationItems.filter((relationItem) => {
+        return (relationItem.value.toLowerCase().indexOf(queryString.toLowerCase()) == 0)
+      }) : relationItems
+      cb(results)
     }
   }
 }
