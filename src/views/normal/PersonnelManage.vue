@@ -76,7 +76,7 @@
           :row-class-name="tableRowClassName"
           class="tableBox"
           default-expand-all
-          :tree-props="{children: 'list', hasChildren: 'hasChildren'}">
+          :tree-props="{children: 'list'}">
 
         <el-table-column width="75"
                          align="center"
@@ -102,16 +102,11 @@
         </el-table-column>
 
         <el-table-column
-            prop="householdName"
-            width="90"
-            label="户主名"
-        ></el-table-column>
-
-        <el-table-column
             prop="name"
             width="90"
             label="姓名">
         </el-table-column>
+
         <el-table-column
             prop="relation"
             label="与户主关系">
@@ -574,6 +569,7 @@ export default {
         }
       }).then(res => {
         this.tableData = res.data.data.records
+
         this.size = res.data.data.size
         this.current = res.data.data.current
         this.total = res.data.data.total
@@ -888,6 +884,9 @@ export default {
         return (relationItem.value.toLowerCase().indexOf(queryString.toLowerCase()) == 0)
       }) : relationItems
       cb(results)
+    },
+    objectSpanMethod({row, column, rowIndex, columnIndex}) {
+
     }
   }
 }
