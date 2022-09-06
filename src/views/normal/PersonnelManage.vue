@@ -76,7 +76,7 @@
           :row-class-name="tableRowClassName"
           class="tableBox"
           default-expand-all
-          :tree-props="{children: 'children', hasChildren: 'hasChildren'}">
+          :tree-props="{children: 'list', hasChildren: 'hasChildren'}">
 
         <el-table-column width="75"
                          align="center"
@@ -100,6 +100,12 @@
             />
           </template>
         </el-table-column>
+
+        <el-table-column
+            prop="householdName"
+            width="90"
+            label="户主名"
+        ></el-table-column>
 
         <el-table-column
             prop="name"
