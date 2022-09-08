@@ -57,7 +57,6 @@
               :show-file-list="false">
             <el-button type="primary" icon="el-icon-upload" size="small" circle></el-button>
           </el-upload>
-
         </el-form-item>
       </div>
     </el-form>
