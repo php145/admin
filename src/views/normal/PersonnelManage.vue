@@ -74,8 +74,7 @@
           :cell-style="cellStyle"
           :row-class-name="tableRowClassName"
           class="tableBox"
-          default-expand-all
-          :tree-props="{children: 'list'}">
+          default-expand-all>
 
         <el-table-column width="75"
                          align="center"
@@ -101,6 +100,12 @@
         </el-table-column>
 
         <el-table-column
+            prop="houseHoldName"
+            width="90"
+            label="户主名"
+        />
+
+        <el-table-column
             prop="name"
             width="90"
             label="姓名">
@@ -108,6 +113,7 @@
 
         <el-table-column
             prop="relation"
+            width="100"
             label="与户主关系">
         </el-table-column>
 
@@ -132,6 +138,7 @@
 
         <el-table-column
             prop="birthday"
+            width="100"
             label="出生日期">
         </el-table-column>
         <el-table-column
@@ -141,6 +148,7 @@
         </el-table-column>
         <el-table-column
             prop="age"
+            width="50"
             label="年龄">
         </el-table-column>
         <el-table-column
@@ -885,7 +893,9 @@ export default {
       cb(results)
     },
     objectSpanMethod({row, column, rowIndex, columnIndex}) {
+      if (columnIndex == 1) {
 
+      }
     }
   }
 }
