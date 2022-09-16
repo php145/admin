@@ -74,6 +74,7 @@
           :cell-style="cellStyle"
           :row-class-name="tableRowClassName"
           class="tableBox"
+          :span-method="objectSpanMethod"
           default-expand-all>
 
         <el-table-column width="75"
@@ -535,6 +536,7 @@ export default {
       households: [],
       //与户主关系的所有项目
       relationItems: [],
+      spanArr: [],
     }
   },
   mounted() {
@@ -575,7 +577,19 @@ export default {
           size: this.size
         }
       }).then(res => {
-        this.tableData = res.data.data.records
+        this.households = res.data.data.records
+
+        for (let i = 0; i < this.households.length; i++) {
+          for (let j = 0; j < this.households[i].list.length; j++) {
+            if (j == 0) {
+              this.spanArr.push(this.households[i].list.length);
+            } else {
+              this.spanArr.push(0);
+            }
+          }
+
+          this.tableData.push.apply(this.tableData, this.households[i].list)
+        }
 
         this.size = res.data.data.size
         this.current = res.data.data.current
@@ -894,7 +908,12 @@ export default {
     },
     objectSpanMethod({row, column, rowIndex, columnIndex}) {
       if (columnIndex == 1) {
-
+        const _row = this.spanArr[rowIndex];
+        const _col = _row > 0 ? 1 : 0;
+        return {
+          rowspan: _row,
+          colspan: _col
+        }
       }
     }
   }
